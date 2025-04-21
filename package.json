@@ -1,0 +1,32 @@
+{
+  "name": "password-manager",
+  "main": "src/electron/main.cjs",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k \"vite\" \"wait-on http:localhost:5173 && electron .\"",
+    "gen-key": "node gen-key.cjs",
+    "build": "tsc -b && vite build",
+    "rebuild": "electron-rebuild",
+    "start": "electron .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.9.1",
+    "dotenv": "^16.5.0",
+    "lucide-preact": "^0.501.0",
+    "preact": "^10.26.4"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.1",
+    "concurrently": "^9.1.2",
+    "electron": "^35.1.5",
+    "electron-rebuild": "^3.2.9",
+    "jest": "^29.7.0",
+    "sass": "^1.86.3",
+    "typescript": "~5.7.2",
+    "vite": "^6.3.1",
+    "wait-on": "^8.0.3"
+  }
+}

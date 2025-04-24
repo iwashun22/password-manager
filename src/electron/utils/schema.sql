@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS email_accounts (
 
 CREATE TABLE IF NOT EXISTS services (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  domain_name TEXT NOT NULL,
+  domain_name TEXT NOT NULL UNIQUE,
+  description_text TEXT,
   icon REAL NOT NULL
 );
 
@@ -23,7 +24,6 @@ CREATE TABLE IF NOT EXISTS service_accounts (
   email_id INTEGER,
   service_id INTEGER NOT NULL,
   encrypted_password TEXT NOT NULL,
-  iv_password TEXT NOT NULL,
-  CHECK (email_id IS NOT NULL OR username IS NOT NULL)
+  iv_password TEXT NOT NULL
 );
 

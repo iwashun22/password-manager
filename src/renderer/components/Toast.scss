@@ -1,0 +1,60 @@
+.toast {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 200px;
+  max-width: 600px;
+  z-index: 100;
+  // border: 2px transparent solid;
+  // background-color: black;
+
+  &.info {
+    background-color: #F9F6EE;
+    color: black;
+    button {
+      color: black;
+      &:hover {
+        color: #444;
+      }
+    }
+  }
+  &.success {
+    background-color: #1DB954;
+    // border-color: green;
+    color: white;
+  }
+  &.error {
+    background-color: #9e1b32;
+    color: white;
+  }
+
+  .message {
+    margin-right: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  button {
+    padding: 0;
+    background-color: transparent;
+    color: #ddd;
+
+    $icon-size: 28px;
+    .icon {
+      height: $icon-size;
+      width: $icon-size;
+    }
+
+    &:hover {
+      color: #aaa;
+    }
+  }
+}

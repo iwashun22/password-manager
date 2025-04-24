@@ -2,6 +2,7 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const readline = require('node:readline');
+const { generate24BytesKey } = require('./src/electron/utils/encryption.cjs');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -15,7 +16,7 @@ require('dotenv').config({ path: KEY_PATH });
 const key = process.env.ENCRYPT_KEY;
 
 function generateNewKey() {
-  const newKey = crypto.randomBytes(24).toString('base64');
+  const newKey = generate24BytesKey();
   const format = `ENCRYPT_KEY="${newKey}"\n`;
   fs.writeFileSync(KEY_PATH, format, { encoding: 'utf-8' });
   return newKey;

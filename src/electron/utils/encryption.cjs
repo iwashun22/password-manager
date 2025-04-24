@@ -13,6 +13,11 @@ function getEncryptionKey(asBuffer = true) {
   return key;
 }
 
+function generate24BytesKey() {
+  const newKey = crypto.randomBytes(24).toString('base64');
+  return newKey;
+}
+
 function encrypt(text, key) {
   const IV = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv('aes-192-cbc', key, IV);
@@ -43,6 +48,7 @@ const defaultDecrypt = ({ iv, encrypted }) => decrypt({ iv, encrypted }, getEncr
 
 module.exports = {
   getEncryptionKey,
+  generate24BytesKey,
   defaultEncrypt,
   defaultDecrypt,
 }

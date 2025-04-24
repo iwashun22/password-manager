@@ -8,7 +8,8 @@ declare global {
       getAllEmailAccounts: () => Promise<any>
     },
     user: {
-      getSystemPassword: () => Promise<{ id: number, used_in: string, hashed_password: string }>
+      getSystemPassword: () => Promise<{ id: number, used_in: string, hashed_password: string }>,
+      storePassword: (password: string) => Promise<string>,
     }
   }
 }

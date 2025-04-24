@@ -22,6 +22,8 @@ contextBridge.exposeInMainWorld('db', {
 contextBridge.exposeInMainWorld('user', {
   getSystemPassword: () =>
     ipcRenderer.invoke('user:get-system-pw'),
+  storePassword: (password) =>
+    ipcRenderer.invoke('user:store-password', password),
 });
 
 contextBridge.exposeInMainWorld('backup', {

@@ -1,26 +1,48 @@
 import { useLocation } from 'preact-iso';
-import { useState, useEffect } from 'preact/hooks';
+import { useCallback } from 'preact/hooks';
+import CardButtonIcon from '@/components/CardButtonIcon';
+import { Mail, UserRound, Settings, type LucideIcon } from 'lucide-preact';
+
+type Button = [
+  text: string,
+  url: string,
+  icon: LucideIcon,
+]
+
+const items: Array<Button> = [
+  ['email accounts', '/email', Mail],
+  ['service accounts', '/service', UserRound],
+  ['settings', '/settings', Settings],
+]
 
 function Home() {
-  const [loading, setLoading] = useState(true);
   const location = useLocation();
-
-  useEffect(() => {
-    (async() => {
-      const data = await window.user.getSystemPassword();
-      if (!data) {
-        location.route('/welcome');
-      }
-      setLoading(false);
-    })();
+  const navigateUrl = useCallback((url: string) => () => {
+    location.route(url)
   }, []);
 
-  if (loading) {
-    return <h1>Loading</h1>
-  }
-
   return (
-    <h2>Home</h2>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
+    >
+      {
+        items.map(([text, url, Icon], i) => (
+          <span style={{ margin: '5px' }} key={i}>
+            <CardButtonIcon
+              text={text}
+              icon={Icon}
+              onClick={navigateUrl(url)}
+              type='main'
+            />
+          </span>
+        ))
+      }
+    </div>
   )
 }
 

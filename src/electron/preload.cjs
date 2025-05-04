@@ -17,6 +17,8 @@ contextBridge.exposeInMainWorld('db', {
     ipcRenderer.invoke('db:get-all-service-accs'),
   editEmailAccount: (emailId, encryptedPassword) =>
     ipcRenderer.invoke('db:edit-email-acc', emailId, encryptedPassword),
+  deleteAllData: () =>
+    ipcRenderer.invoke('db:delete-all-data'),
 });
 
 contextBridge.exposeInMainWorld('user', {
@@ -24,6 +26,8 @@ contextBridge.exposeInMainWorld('user', {
     ipcRenderer.invoke('user:get-system-pw'),
   storePassword: (password) =>
     ipcRenderer.invoke('user:store-password', password),
+  verifyPassword: (password) =>
+    ipcRenderer.invoke('user:verify-password', password),
 });
 
 contextBridge.exposeInMainWorld('backup', {

@@ -9,9 +9,12 @@ const {
   getAllEmailAccounts,
   editEmailAccount,
   getSystemPassword,
+  verifyPassword,
   getBackupData,
-  storePassword
+  storePassword,
+  deleteAllData,
 } = require('./utils/eventHandler.cjs');
+const { getOrCreateKey } = require('./utils/helper.cjs');
 
 const isDev = !app.isPackaged;
 
@@ -19,9 +22,11 @@ ipcMain.handle('db:create-email-acc', createEmailAccount);
 ipcMain.handle('db:create-service-acc', createServiceAccount);
 ipcMain.handle('db:get-all-email-accs', getAllEmailAccounts);
 ipcMain.handle('db:edit-email-acc', editEmailAccount);
+ipcMain.handle('db:delete-all-data', deleteAllData);
 
 ipcMain.handle('user:get-system-pw', getSystemPassword);
 ipcMain.handle('user:store-password', storePassword);
+ipcMain.handle('user:verify-password', verifyPassword);
 
 //TODO:
 ipcMain.handle('backup:get-backup-data', getBackupData);
@@ -61,6 +66,7 @@ app.whenReady().then(() => {
 
       const newDB = new Sqlite(tempFilePath);
       initializeSchema(newDB);
+      getOrCreateKey(true);
       encryptDB();
       cleanupTemp();
     } else {
@@ -89,6 +95,7 @@ app.on('before-quit', () => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+  encryptDB();
 });
 
 

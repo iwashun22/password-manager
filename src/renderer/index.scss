@@ -18,6 +18,7 @@
   margin: 0;
   outline: none;
   box-sizing: border-box;
+  font-family: 'Ubuntu Medium', Arial, Helvetica, sans-serif;
 }
 
 a {
@@ -38,6 +39,10 @@ body {
   // position: relative;
   overflow: hidden;
   overscroll-behavior: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Ubuntu Bold', Arial, Helvetica, sans-serif;
 }
 
 h1 {
@@ -69,6 +74,60 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+.fw-light {
+  font-family: 'Ubuntu Light', Arial, Helvetica, sans-serif;
+
+  &.italic {
+    font-family: 'Ubuntu Light Italic', Arial, Helvetica, sans-serif;
+  }
+}
+
+.fw-medium {
+  font-family: 'Ubuntu Medium', Arial, Helvetica, sans-serif;
+
+  &.italic {
+    font-family: 'Ubuntu Medium Italic', Arial, Helvetica, sans-serif;
+  }
+}
+
+.fw-bold {
+  font-family: 'Ubuntu Bold', Arial, Helvetica, sans-serif;
+
+  &.italic {
+    font-family: 'Ubuntu Bold Italic', Arial, Helvetica, sans-serif;
+  }
+}
+
+@font-face {
+  font-family: 'Ubuntu Light';
+  src: url('@assets/fonts/Ubuntu/Ubuntu-Light.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Ubuntu Light Italic';
+  src: url('@assets/fonts/Ubuntu/Ubuntu-LightItalic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Ubuntu Medium';
+  src: url('@assets/fonts/Ubuntu/Ubuntu-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Ubuntu Medium Italic';
+  src: url('@assets/fonts/Ubuntu/Ubuntu-MediumItalic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Ubuntu Bold';
+  src: url('@assets/fonts/Ubuntu/Ubuntu-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Ubuntu Bold Italic';
+  src: url('@assets/fonts/Ubuntu/Ubuntu-BoldItalic.woff2') format('woff2');
 }
 
 // @media (prefers-color-scheme: light) {

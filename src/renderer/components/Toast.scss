@@ -51,6 +51,7 @@
     .icon {
       height: $icon-size;
       width: $icon-size;
+      display: block;
     }
 
     &:hover {

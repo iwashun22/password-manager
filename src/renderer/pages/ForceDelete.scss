@@ -1,0 +1,25 @@
+.danger-container {
+  background-color: #141414;
+  padding: 20px 50px;
+  display: inline-block;
+  border-radius: 20px;
+
+  .header {
+    color: #DE3163;
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+
+  .text {
+    color: #ff83b9;
+    width: 80vw;
+    max-width: 500px;
+    margin: auto;
+    text-align: start;
+  }
+
+  .delete-btn {
+    text-transform: uppercase;
+    background-color: #DC143C;
+  }
+}

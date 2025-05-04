@@ -28,7 +28,7 @@ function Toast({
         { message }
       </span>
       <button onClick={() => onClose()}>
-        <X display="block" className="icon"/>
+        <X className="icon"/>
       </button>
     </div>,
     document.getElementById("portal-root")!

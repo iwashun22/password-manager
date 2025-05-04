@@ -1,0 +1,30 @@
+.lock-btn {
+  $color: #7DF9FF;
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(-50%, -150%);
+  padding: 15px;
+  border-radius: 50%;
+  background-color: black;
+  border: 2px $color solid;
+  transition: .2s;
+  box-shadow: 0 0 10px $color,
+              0 0 14px $color;
+
+  .icon {
+    $size: 30px;
+    display: block;
+    width: $size;
+    height: $size;
+    color: $color;
+  }
+
+  &:hover {
+    // background-color: #9e8fb6;
+    border-color: $color;
+    box-shadow: 0 0 10px $color,
+                0 0 20px $color,
+                0 0 35px $color;
+  }
+}

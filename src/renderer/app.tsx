@@ -1,18 +1,43 @@
 import { LocationProvider, Router, Route } from 'preact-iso';
 import InactivityHandler from './components/InactivityHandler';
+import LockButton from './components/LockButton';
 import Home from './pages/Home';
 import WelcomePage from './pages/WelcomePage';
-import Login from './pages/Login';
+import ShowRecoveryKey from './pages/ShowRecoveryKey';
+import Authenticate from './pages/Authenticate';
+import ForceDelete from './pages/ForceDelete';
+import Email from './pages/Email';
+import Service from './pages/Service';
+import Settings from './pages/Settings';
 import './app.scss';
 
 export function App() {
   return (
     <LocationProvider>
-      <InactivityHandler excludePaths={["/welcome", "/login"]}/>
+      <InactivityHandler
+        excludePaths={[
+          "/welcome",
+          "/auth",
+          "/force-delete"
+        ]}
+      />
+      <LockButton
+        excludePaths={[
+          "/welcome",
+          "/auth",
+          "/force-delete",
+          "/recovery-key"
+        ]}
+      />
       <Router>
         <Route path="/" component={Home} />
         <Route path="/welcome" component={WelcomePage} />
-        <Route path="/login" component={Login} />
+        <Route path="/recovery-key" component={ShowRecoveryKey} />
+        <Route path="/auth" component={Authenticate} />
+        <Route path="/force-delete" component={ForceDelete} />
+        <Route path="/email" component={Email} />
+        <Route path="/service" component={Service} />
+        <Route path="/settings" component={Settings} />
       </Router>
     </LocationProvider>
   )

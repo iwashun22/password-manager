@@ -1,6 +1,8 @@
 const { db } = require('./initData.cjs');
 const { defaultEncrypt, generate24BytesKey } = require('./encryption.cjs');
-const { hashPassword } = require('./helper.cjs');
+const { hashPassword, comparePassword } = require('./helper.cjs');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const SYSTEM_PASSWORD_KEY = 'system';
 const SYSTEM_TOKEN_KEY = 'token';
@@ -32,17 +34,29 @@ async function editEmailAccount(event, emailId, encryptedPassword) {
   // TODO:
 }
 
+async function deleteAllData() {
+  const query = fs.readFileSync(path.resolve(__dirname, 'delete.sql'), 'utf8');
+  db.exec(query);
+}
+
 async function getSystemPassword(event) {
-  const statement = db.prepare("SELECT * FROM passwords WHERE used_in == ?");
-  const data = statement.get(SYSTEM_PASSWORD_KEY);
-  return data;
+  const statement = db.prepare("SELECT * FROM keys WHERE used_in == ?");
+
+  const passwordData = statement.get(SYSTEM_PASSWORD_KEY);
+  const tokenData = statement.get(SYSTEM_TOKEN_KEY);
+  const recoveryData = statement.get(SYSTEM_RECOVERY_KEY);
+
+  if (!passwordData && (tokenData || recoveryData)) {
+    throw new Error('Detected security issue: Password has been removed manually while other sensitive keys still exist.');
+  }
+  return passwordData;
 }
 
 async function storePassword(event, password) {
   const hashed = hashPassword(password);
   const token = generate24BytesKey();
   const { encrypted, iv } = defaultEncrypt(token);
-  const statement = db.prepare("INSERT INTO passwords (used_in, hashed_password) VALUES (@keyName, @data)");
+  const statement = db.prepare("INSERT INTO keys (used_in, key_string) VALUES (@keyName, @data)");
 
   const data = [
     { keyName: SYSTEM_PASSWORD_KEY, data: hashed },
@@ -57,6 +71,15 @@ async function storePassword(event, password) {
   return iv;
 }
 
+async function verifyPassword(event, password) {
+  const statement = db.prepare('SELECT * FROM keys WHERE used_in == ?');
+  const data = statement.get(SYSTEM_PASSWORD_KEY);
+  const hashedPassword = data["key_string"];
+
+  const isMatched = comparePassword(password, hashedPassword);
+  return isMatched;
+}
+
 async function getBackupData(event) {
   // TODO:
 }
@@ -66,7 +89,9 @@ module.exports = {
   createServiceAccount,
   getAllEmailAccounts,
   editEmailAccount,
+  deleteAllData,
   getSystemPassword,
+  verifyPassword,
   getBackupData,
   storePassword,
 }

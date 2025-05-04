@@ -1,0 +1,10 @@
+.verify-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .submit-btn {
+    flex: 1;
+  }
+}

@@ -1,0 +1,27 @@
+$transition: .2s;
+
+.back-btn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(50%, 50%);
+  background-color: transparent;
+  transition: $transition;
+
+  .icon {
+    $size: 24px;
+    display: block;
+    width: $size;
+    height: $size;
+    color: #E2DFD2;
+    transition: $transition;
+  }
+
+  &:hover {
+    background-color: #202020;
+    
+    .icon {
+      color: white;
+    }
+  }
+}

@@ -3,7 +3,8 @@ const path = require('node:path');
 const fs = require('node:fs');
 const os = require('node:os');
 const Sqlite = require('better-sqlite3');
-const { defaultEncrypt, defaultDecrypt } = require('./encryption.cjs');
+const { encrypt, decrypt } = require('./encryption.cjs');
+const { getOrCreateKey } = require('./helper.cjs');
 
 const encryptedFilePath = path.join(app.getPath('userData'), 'data.enc');
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'securedb-'));
@@ -33,10 +34,10 @@ function decryptDB() {
   try {
     const iv  = data.slice(0, 24); // 16 Bytes IV in base64
     const encrypted = data.slice(24);
-    
-    const decrypted = defaultDecrypt({ iv, encrypted });
+
+    const decrypted = decrypt({ iv, encrypted }, getOrCreateKey());
     const buffer = Buffer.from(decrypted, 'base64');
-    
+
     fs.writeFileSync(tempFilePath, buffer);
     return new Sqlite(tempFilePath);
   }
@@ -51,10 +52,9 @@ function decryptDB() {
 function encryptDB() {
   const raw = fs.readFileSync(tempFilePath);
   const base64 = raw.toString('base64');
-  const { iv, encrypted } = defaultEncrypt(base64);
+  const { iv, encrypted } = encrypt(base64, getOrCreateKey());
 
   const joined = iv + encrypted;
-  console.log(iv, iv.length);
   fs.writeFileSync(encryptedFilePath, joined, 'utf8');
 }
 

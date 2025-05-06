@@ -1,3 +1,5 @@
+@use './styles/fonts' as fonts;
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -77,26 +79,26 @@ button:focus-visible {
 }
 
 .fw-light {
-  font-family: 'Ubuntu Light', Arial, Helvetica, sans-serif;
+  @include fonts.fw-light();
 
   &.italic {
-    font-family: 'Ubuntu Light Italic', Arial, Helvetica, sans-serif;
+    @include fonts.fw-light-italic();
   }
 }
 
 .fw-medium {
-  font-family: 'Ubuntu Medium', Arial, Helvetica, sans-serif;
+  @include fonts.fw-medium();
 
   &.italic {
-    font-family: 'Ubuntu Medium Italic', Arial, Helvetica, sans-serif;
+    @include fonts.fw-medium-italic();
   }
 }
 
 .fw-bold {
-  font-family: 'Ubuntu Bold', Arial, Helvetica, sans-serif;
+  @include fonts.fw-bold();
 
   &.italic {
-    font-family: 'Ubuntu Bold Italic', Arial, Helvetica, sans-serif;
+    @include fonts.fw-bold-italic();
   }
 }
 

@@ -1,0 +1,29 @@
+@mixin ubuntu($ubuntu-font, $font-weight, $italic) {
+  font-family: $ubuntu-font, Arial, Helvetica, sans-serif;
+  font-weight: $font-weight;
+
+  @if $italic {
+    font-style: italic;
+  }
+}
+
+@mixin fw-light {
+  @include ubuntu('Ubuntu Light', 300, false);
+}
+@mixin fw-light-italic {
+  @include ubuntu('Ubuntu Light Italic', 300, true);
+}
+
+@mixin fw-medium {
+  @include ubuntu('Ubuntu Medium', 500, false);
+}
+@mixin fw-medium-italic {
+  @include ubuntu('Ubuntu Medium Italic', 500, true);
+}
+
+@mixin fw-bold {
+  @include ubuntu('Ubuntu Bold', 700, false);
+}
+@mixin fw-bold-italic {
+  @include ubuntu('Ubuntu Bold Italic', 700, true);
+}

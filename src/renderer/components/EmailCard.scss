@@ -1,0 +1,76 @@
+.email-card-container {
+  background-color: #141414;
+  display: inline-block;
+  border-radius: 15px;
+  overflow: hidden;
+  width: 270px;
+  margin: 10px;
+
+  .email, .password {
+    padding: 12px 20px;
+    text-align: left;
+
+    p {
+      font-size: 14px;
+      text-transform: capitalize;
+    }
+
+    h3, h4 {
+      margin-left: 20px;
+    }
+  }
+
+  .email {
+    background-color: #4c82e5;
+    cursor: pointer;
+  }
+  .password {
+    background-color: #6495ED;
+
+    .buttons-container {
+      text-align: end;
+
+      button {
+        padding: 5px;
+        margin-left: 14px;
+        background-color: transparent;
+
+        .icon {
+          $size: 25px;
+          display: block;
+          width: $size;
+          height: $size;
+        }
+
+        &:hover {
+          .icon {
+            color: #cdcdcd;
+          }
+        }
+      }
+    }
+  }
+
+  .modification-button {
+    display: flex;
+    flex-direction: row;
+
+    button {
+      flex: 1;
+      text-align: center;
+
+      .icon {
+        display: inline-block;
+      }
+
+      &:hover {
+        .icon.edit {
+          color: #4169E1;
+        }
+        .icon.delete {
+          color: #CD5C5C;
+        }
+      }
+    }
+  }
+}

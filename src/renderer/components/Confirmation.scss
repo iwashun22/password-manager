@@ -1,0 +1,55 @@
+.dark-filter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .alert-box {
+    background-color: #eee;
+    padding: 10px;
+    border-radius: 15px;
+    margin-top: -120px;
+    min-width: 300px;
+
+    .main {
+      padding: 10px;
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+
+      button {
+        text-transform: lowercase;
+
+        &.cancel {
+          background-color: #141414;
+
+          &:hover {
+            background-color: #282828;
+          }
+        }
+      }
+    }
+
+    &.danger {
+      background-color: #F08080;
+
+      .button-container {
+        .confirm {
+          background-color: #9e1b32;
+
+          &:hover {
+            background-color: #C6011F;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 const { db } = require('./initData.cjs');
-const { defaultEncrypt, generate24BytesKey } = require('./encryption.cjs');
-const { hashPassword, comparePassword } = require('./helper.cjs');
+const { defaultEncrypt, defaultDecrypt, generateKey, separateIV } = require('./encryption.cjs');
+const { hashPassword, comparePassword, mapPasswordData } = require('./helper.cjs');
+const { clipboard } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -10,9 +11,9 @@ const SYSTEM_RECOVERY_KEY = 'recover';
 
 async function createEmailAccount(event, email, password) {
   try {
-    const { iv, encrypted } = defaultEncrypt(password);
-    const statement = db.prepare('INSERT INTO emails (email, encrypted_password, iv_password) VALUES (?, ?, ?)');
-    const info = statement.run(email, encrypted, iv);
+    const encrypted = defaultEncrypt(password);
+    const statement = db.prepare('INSERT INTO email_accounts (email, encrypted_password) VALUES (?, ?)');
+    const info = statement.run(email, encrypted);
     return info;
   }
   catch (err) {
@@ -25,13 +26,67 @@ async function createServiceAccount(event, emailId, username, encryptedPassword)
 }
 
 async function getAllEmailAccounts() {
-  const statement = db.prepare('SELECT * FROM email_accounts');
-  const data = statement.all();
-  return data;
+  try {
+    const statement = db.prepare('SELECT * FROM email_accounts');
+    const data = statement.all();
+
+    const mapped = data.map(mapPasswordData);
+    return mapped;
+  }
+  catch (err) {
+    console.log(err);
+    return [];
+  }
+}
+
+async function getAllServiceAccounts(event, linkedEmailId = undefined) {
+  try {
+    if (typeof linkedEmailId === "number") {
+      const statement = db.prepare('SELECT * FROM service_accounts WHERE email_id = ?');
+      const data = statement.all(linkedEmailId);
+      return data;
+    }
+
+    const statement = db.prepare('SELECT * FROM service_accounts');
+    const data = statement.all();
+    return data;
+  }
+  catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+
+async function getAllServicesUsed(event, serviceId = undefined) {
+  try {
+    if (typeof serviceId === "number") {
+      const statement = db.prepare('SELECT * FROM service_accounts WHERE service_id = ?');
+      const data = statement.all(serviceId);
+    }
+
+    // TODO:
+    const statement = db.prepare('SELECT * FROM service_accounts')
+  }
+  catch (err) {
+    console.log(err);
+  }
 }
 
 async function editEmailAccount(event, emailId, encryptedPassword) {
   // TODO:
+}
+
+async function deleteEmailAccount(event, emailId) {
+  try {
+    const statement = db.prepare('DELETE FROM email_accounts WHERE id = ?');
+    const info = statement.run(emailId);
+
+    return info;
+  }
+  catch (err) {
+    console.log(err);
+    return null;
+  }
 }
 
 async function deleteAllData() {
@@ -40,7 +95,7 @@ async function deleteAllData() {
 }
 
 async function getSystemPassword(event) {
-  const statement = db.prepare("SELECT * FROM keys WHERE used_in == ?");
+  const statement = db.prepare("SELECT * FROM keys WHERE used_in = ?");
 
   const passwordData = statement.get(SYSTEM_PASSWORD_KEY);
   const tokenData = statement.get(SYSTEM_TOKEN_KEY);
@@ -54,21 +109,22 @@ async function getSystemPassword(event) {
 
 async function storePassword(event, password) {
   const hashed = hashPassword(password);
-  const token = generate24BytesKey();
-  const { encrypted, iv } = defaultEncrypt(token);
+  const token = generateKey();
+  const encryptedToken = defaultEncrypt(token);
+  const { IV, encrypted: recoverToken } = separateIV(encryptedToken, true);
   const statement = db.prepare("INSERT INTO keys (used_in, key_string) VALUES (@keyName, @data)");
 
   const data = [
     { keyName: SYSTEM_PASSWORD_KEY, data: hashed },
-    { keyName: SYSTEM_RECOVERY_KEY, data: encrypted },
-    { keyName: SYSTEM_TOKEN_KEY, data: token }
+    { keyName: SYSTEM_TOKEN_KEY, data: token },
+    { keyName: SYSTEM_RECOVERY_KEY, data: recoverToken }
   ];
   const insert = db.transaction((arr) => {
     for (const item of arr) statement.run(item);
   });
 
   insert(data);
-  return iv;
+  return IV;
 }
 
 async function verifyPassword(event, password) {
@@ -80,6 +136,29 @@ async function verifyPassword(event, password) {
   return isMatched;
 }
 
+async function requestDecryptedPassword(event, encryptedPassword, request) {
+  try {
+    const decrypted = defaultDecrypt(encryptedPassword);
+
+    switch(request) {
+      case 'get':
+        return decrypted;
+      case 'copy':
+        clipboard.writeText(decrypted);
+        return true;
+    }
+  }
+  catch (err) {
+    console.log(err);
+    switch(request) {
+      case 'show':
+        return '';
+      case 'copy':
+        return false;
+    }
+  }
+}
+
 async function getBackupData(event) {
   // TODO:
 }
@@ -88,10 +167,13 @@ module.exports = {
   createEmailAccount,
   createServiceAccount,
   getAllEmailAccounts,
+  getAllServiceAccounts,
   editEmailAccount,
+  deleteEmailAccount,
   deleteAllData,
   getSystemPassword,
   verifyPassword,
+  requestDecryptedPassword,
   getBackupData,
   storePassword,
 }

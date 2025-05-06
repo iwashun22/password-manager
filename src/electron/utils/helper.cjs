@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const { app } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
-const { generate24BytesKey, defaultDecrypt, defaultEncrypt } = require('./encryption.cjs');
+const { generateKey, defaultDecrypt, defaultEncrypt } = require('./encryption.cjs');
 
 function hashPassword(plainText) {
   const saltRound = 10;
@@ -23,22 +23,28 @@ function getOrCreateKey(forceCreate = false) {
   }
 
   if (!fs.existsSync(keyPath)) {
-    const genKey = generate24BytesKey();
-    const { iv, encrypted } = defaultEncrypt(genKey);
-    const secret = iv + encrypted;
-    fs.writeFileSync(keyPath, secret, 'utf8');
-    return Buffer.from(genKey, 'base64');
+    const genKey = generateKey();
+    const encryptedKey = defaultEncrypt(genKey);
+    fs.writeFileSync(keyPath, encryptedKey, 'utf8');
+    return encryptedKey;
   }
 
   const secret = fs.readFileSync(keyPath, 'utf8');
-  const iv = secret.slice(0, 24);
-  const encrypted = secret.slice(24);
-  const key = defaultDecrypt({ iv, encrypted });
+  const key = defaultDecrypt(secret);
   return Buffer.from(key, 'base64');
+}
+
+function mapPasswordData(data) {
+  const decrypted = defaultDecrypt(data['encrypted_password']);
+  return {
+    ...data,
+    password_length: decrypted.length
+  }
 }
 
 module.exports = {
   hashPassword,
   comparePassword,
   getOrCreateKey,
+  mapPasswordData
 }

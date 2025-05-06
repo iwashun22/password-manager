@@ -7,9 +7,12 @@ const {
   createEmailAccount,
   createServiceAccount,
   getAllEmailAccounts,
+  getAllServiceAccounts,
   editEmailAccount,
+  deleteEmailAccount,
   getSystemPassword,
   verifyPassword,
+  requestDecryptedPassword,
   getBackupData,
   storePassword,
   deleteAllData,
@@ -21,12 +24,15 @@ const isDev = !app.isPackaged;
 ipcMain.handle('db:create-email-acc', createEmailAccount);
 ipcMain.handle('db:create-service-acc', createServiceAccount);
 ipcMain.handle('db:get-all-email-accs', getAllEmailAccounts);
+ipcMain.handle('db:get-all-service-accs', getAllServiceAccounts);
 ipcMain.handle('db:edit-email-acc', editEmailAccount);
+ipcMain.handle('db:delete-email-acc', deleteEmailAccount);
 ipcMain.handle('db:delete-all-data', deleteAllData);
 
 ipcMain.handle('user:get-system-pw', getSystemPassword);
 ipcMain.handle('user:store-password', storePassword);
 ipcMain.handle('user:verify-password', verifyPassword);
+ipcMain.handle('user:request-decrypted-password', requestDecryptedPassword);
 
 //TODO:
 ipcMain.handle('backup:get-backup-data', getBackupData);
@@ -88,14 +94,14 @@ app.on('before-quit', () => {
   try {
     encryptDB();
     cleanupTemp();
+    console.log('Encrypted DB');
   } catch (err) {
     console.error('Failed to encrypt DB before quitting:', err);
   }
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-  encryptDB();
+  app.quit();
 });
 
 

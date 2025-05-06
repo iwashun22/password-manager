@@ -1,6 +1,6 @@
 import { useEffect } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
-import { signal } from '@preact/signals';
+import { signal, effect } from '@preact/signals';
 
 const inactivityTimeout = signal<ReturnType<typeof setTimeout> | null>(null);
 export const previousPath = signal<string>('');
@@ -13,12 +13,12 @@ interface Props {
 function InactivityHandler({ excludePaths }: Props) {
   const location = useLocation();
 
-  useEffect(() => {
+  effect(() => {
     if (logoutSignal.value) {
       logoutSignal.value = false;
       location.route('/auth');
     }
-  }, [logoutSignal.value]);
+  });
 
   useEffect(() => {
     (async() => {
@@ -47,7 +47,7 @@ function InactivityHandler({ excludePaths }: Props) {
       inactivityTimeout.value = setTimeout(() => {
         previousPath.value = currentPath;
         location.route('/auth');
-      }, 60 * 1000);
+      }, 2 * 60 * 1000);
     }
 
     const events: Array<keyof WindowEventMap> = ["mousemove", "mousedown", "touchstart", "click"];

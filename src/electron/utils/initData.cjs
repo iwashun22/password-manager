@@ -28,17 +28,13 @@ function decryptDB() {
   if (!fs.existsSync(encryptedFilePath))
     return new Sqlite(tempFilePath);
 
-  const data = fs.readFileSync(encryptedFilePath, 'utf8');
+  const data = fs.readFileSync(encryptedFilePath);
   if (!data) return new Sqlite(tempFilePath);
 
   try {
-    const iv  = data.slice(0, 24); // 16 Bytes IV in base64
-    const encrypted = data.slice(24);
+    const decrypted = decrypt(data, getOrCreateKey(), true);
 
-    const decrypted = decrypt({ iv, encrypted }, getOrCreateKey());
-    const buffer = Buffer.from(decrypted, 'base64');
-
-    fs.writeFileSync(tempFilePath, buffer);
+    fs.writeFileSync(tempFilePath, decrypted);
     return new Sqlite(tempFilePath);
   }
   catch (err) {
@@ -51,11 +47,9 @@ function decryptDB() {
 
 function encryptDB() {
   const raw = fs.readFileSync(tempFilePath);
-  const base64 = raw.toString('base64');
-  const { iv, encrypted } = encrypt(base64, getOrCreateKey());
+  const encrypted = encrypt(raw, getOrCreateKey(), true);
 
-  const joined = iv + encrypted;
-  fs.writeFileSync(encryptedFilePath, joined, 'utf8');
+  fs.writeFileSync(encryptedFilePath, encrypted);
 }
 
 function cleanupTemp() {

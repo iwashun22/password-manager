@@ -1,0 +1,111 @@
+@use '../../styles/fonts' as fonts;
+
+.inline-block {
+  display: inline-block;
+  background-color: #141414;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.header-container {
+  padding: 20px 20px 14px;
+  background-color: #93C572;
+
+  .form-header {
+    text-transform: capitalize;
+    color: #FFFDD0;
+  }
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 240px;
+  padding: 30px;
+  box-sizing: content-box;
+}
+
+$input-height: 38px;
+$margin-bottom: 12px;
+.input-wrapper {
+  height: $input-height;
+  width: 100%;
+  margin-bottom: $margin-bottom;
+  position: relative;
+  z-index: 100;
+
+  .form-input {
+    height: 100%;
+    font-size: 18px;
+    padding-inline: 8px;
+    width: 100%;
+    background-color: #000;
+    border: none;
+    border-radius: 6px;
+    color: #FFFDD0;
+    z-index: 10;
+
+    &::placeholder {
+      @include fonts.fw-light();
+      text-transform: capitalize;
+    }
+  }
+
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 70%;
+    z-index: -1;
+  }
+  &::before {
+    left: 0;
+  }
+  &::after {
+    right: 0;
+  }
+
+  &:focus-within {
+    &::before, &::after {
+      background-color: lime;
+      box-shadow: 0 0 10px lime,
+                  0 0 15px lime;
+    }
+
+    .form-input {
+      background-color: #90EE90;
+      color: #141414;
+
+      &::placeholder {
+        color: #93C572;
+      }
+    }
+  }
+
+  .toggle-visibility {
+    position: absolute;
+    top: 50%;
+    right: 2%;
+    transform: translateY(-50%);
+    cursor: pointer;
+
+    .icon {
+      display: block;
+    }
+  }
+}
+
+.form-submit {
+  height: $input-height;
+  display: inline-block;
+  margin-left: auto;
+  text-transform: uppercase;
+  background-color: #FF7F50;
+
+  &:hover {
+    background-color: #de6f47;
+  }
+}

@@ -10,7 +10,8 @@
     "build": "tsc -b && vite build",
     "rebuild": "electron-rebuild",
     "start": "electron .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "update-encryption": "node secureFile -e ./src/electron/utils/encryption.cjs"
   },
   "dependencies": {
     "@preact/signals": "^2.0.4",

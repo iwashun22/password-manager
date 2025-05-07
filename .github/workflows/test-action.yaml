@@ -31,5 +31,8 @@ jobs:
     - name: Decrypt encryption logic
       run: node secureFile.cjs -d src/electron/utils/encryption.cjs.enc
 
+    - name: Compile helper.ts to helper.js
+      run: npx tsc ./src/renderer/utils/helper.ts
+
     - name: Run test
       run: yarn jest

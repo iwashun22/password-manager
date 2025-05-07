@@ -9,7 +9,7 @@ import FormInputText from '@/components/FormInput/Text';
 import FormInputSubmit from '@/components/FormInput/Submit';
 import Toast from '@/components/Toast';
 import EmailCard from '@/components/EmailCard';
-import { matchEmailPattern } from '@/utils/helper';
+import { matchEmailPattern } from '@/utils/helper.ts';
 import { refreshTrigger, triggerUpdate } from '@/utils/triggers';
 
 import './Email.scss';
@@ -93,7 +93,7 @@ function EmailForm() {
     e.preventDefault();
     const [email, passwd] = [emailAccountRef.current, passwordRef.current];
     if (email && passwd) {
-      let emailAddress: string | undefined;
+      let emailAddress: ReturnType<typeof matchEmailPattern>;
       if (!email.value) {
         setError('Email is missing');
         return;
@@ -101,13 +101,11 @@ function EmailForm() {
       else {
         emailAddress = matchEmailPattern(email.value);
 
-        // memo: user+sub_address@example.com will be undefined
-        const withoutSubAdress = matchEmailPattern(email.value, false);
-        if (!emailAddress) {
+        if (emailAddress === undefined) {
           setError('Invalid email format');
           return;
         }
-        else if (!withoutSubAdress) {
+        else if (emailAddress.subaddress !== null) {
           setError('Subaddressing is disabled for adding an email')
           return;
         }
@@ -120,7 +118,7 @@ function EmailForm() {
 
       (async () => {
         try {
-          const info = await window.db.createEmailAccount(emailAddress, passwd.value);
+          const info = await window.db.createEmailAccount(emailAddress.email, passwd.value);
           console.log(info);
           formOpenSignal.value = false;
           triggerUpdate();

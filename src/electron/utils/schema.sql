@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS service_accounts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT,
   email_id INTEGER,
+  subaddress TEXT,
   service_id INTEGER NOT NULL,
   encrypted_password TEXT NOT NULL
 );

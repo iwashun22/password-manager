@@ -1,6 +1,5 @@
 export function matchEmailPattern(
   str: string,
-  allowSubAddress: boolean = true
 ) {
   const regex = /^([^@]+)@([^@]+)$/;
 
@@ -10,13 +9,18 @@ export function matchEmailPattern(
   const username = match[1];
   const domain = match[2];
 
+  if (hasUnwantedCharacter(username)) return undefined;
+
   const [main, subaddress] = splitSubAddressing(username);
-  if (!allowSubAddress && (subaddress !== null)) return undefined;
+  if (!main) return undefined;
 
   const validDomain = checkValidDomain(domain);
   if (!validDomain) return undefined;
 
-  return [main, domain].join('@');
+  return {
+    email: [main, domain].join('@'),
+    subaddress,
+  }
 }
 
 export function splitSubAddressing(username: string): [string, string | null] {
@@ -33,10 +37,15 @@ export function splitSubAddressing(username: string): [string, string | null] {
 }
 
 export function checkValidDomain(domain: string) {
-  const domainRegex = /^(?:[a-zA-Z0-9-]+.)+[a-zA-Z]{2,}$/;
+  const domainRegex = /^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
   
   const match = domain.match(domainRegex);
   if (match) return true;
 
   return false;
+}
+
+export function hasUnwantedCharacter(str: string) {
+  const validChar = /^[a-zA-Z0-9_.+\-]+$/;
+  return !validChar.test(str);
 }

@@ -1,0 +1,35 @@
+name: Test all modules
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '23.11.0'
+
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Set environment variables
+      run: |
+        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env.local
+
+    - name: Set application env
+      run: |
+        echo "ENCRYPT_KEY=${{ secrets.ENCRYPT_KEY }}" > src/electron/.env
+
+    - name: Decrypt encryption logic
+      run: node secureFile.cjs -d src/electron/utils/encryption.cjs.enc
+
+    - name: Run test
+      run: yarn jest

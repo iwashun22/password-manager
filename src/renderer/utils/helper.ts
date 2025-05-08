@@ -38,7 +38,7 @@ export function splitSubAddressing(username: string): [string, string | null] {
 
 export function checkValidDomain(domain: string) {
   const domainRegex = /^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
-  
+
   const match = domain.match(domainRegex);
   if (match) return true;
 

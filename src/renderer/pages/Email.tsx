@@ -19,7 +19,7 @@ const formOpenSignal = signal(false);
 const filterSearchValue = (searchString: string) => (data: EmailProp) => {
   const email = data['email'];
   const regex = new RegExp(searchString, "i");
-  
+
   const match = email.match(regex);
   return match !== null;
 }
@@ -44,11 +44,10 @@ function Email() {
   const handleSearch = useCallback((e: FormEvent) => {
     e.preventDefault();
 
-    // TODO:
     setSearchValue(searchRef.current?.value || '');
   }, []);
 
-  const triggerOpenForm = useCallback((e: unknown) => {
+  const openForm = useCallback((e: unknown) => {
     formOpenSignal.value = true;
   }, []);
 
@@ -66,7 +65,7 @@ function Email() {
       <SearchBar
         placeholder='Find email'
         onSearch={handleSearch}
-        onAddNew={triggerOpenForm}
+        onAddNew={openForm}
         searchRef={searchRef}
       />
       <div className="container">
@@ -85,7 +84,7 @@ function EmailForm() {
   const passwordRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState('');
 
-  const closeFormSignal = useCallback(() => {
+  const closeForm = useCallback(() => {
     formOpenSignal.value = false;
   }, []);
 
@@ -140,7 +139,7 @@ function EmailForm() {
           variant='error'
         />
       }
-      <BackButton onClick={closeFormSignal}/>
+      <BackButton onClick={closeForm}/>
       <FormContainer onSubmit={handleSubmit} headerText='new email account'>
         <FormInputText
           inputRef={emailAccountRef}

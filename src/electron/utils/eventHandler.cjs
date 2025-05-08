@@ -57,23 +57,36 @@ async function getAllServiceAccounts(event, linkedEmailId = undefined) {
   }
 }
 
-async function getAllServicesUsed(event, serviceId = undefined) {
+async function getAllServices(event) {
   try {
-    if (typeof serviceId === "number") {
-      const statement = db.prepare('SELECT * FROM service_accounts WHERE service_id = ?');
-      const data = statement.all(serviceId);
-    }
-
     // TODO:
-    const statement = db.prepare('SELECT * FROM service_accounts')
+    const statement = db.prepare(`
+      SELECT services.*, s.count FROM services
+      JOIN (
+        SELECT service_id, COUNT(*) AS count
+          FROM service_accounts
+        GROUP BY service_id
+      ) AS s ON s.service_id = services.id
+    `);
   }
   catch (err) {
     console.log(err);
   }
 }
 
-async function editEmailAccount(event, emailId, encryptedPassword) {
+async function editEmailAccount(event, emailId, newPassword) {
   // TODO:
+  try {
+    const encrypted = defaultEncrypt(newPassword);
+    const statement = db.prepare('UPDATE email_accounts SET encrypted_password = ? WHERE id = ?');
+
+    const info = statement.run(encrypted, emailId);
+    return info;
+  }
+  catch (err) {
+    console.log(err);
+    return null;
+  }
 }
 
 async function deleteEmailAccount(event, emailId) {
@@ -167,6 +180,7 @@ module.exports = {
   createEmailAccount,
   createServiceAccount,
   getAllEmailAccounts,
+  getAllServices,
   getAllServiceAccounts,
   editEmailAccount,
   deleteEmailAccount,

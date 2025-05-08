@@ -96,6 +96,14 @@ $margin-bottom: 12px;
       display: block;
     }
   }
+
+  .select {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    transform: translateY(100%);
+  }
 }
 
 .form-submit {

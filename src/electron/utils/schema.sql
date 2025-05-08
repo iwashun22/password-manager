@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS services (
   service_name TEXT NOT NULL UNIQUE,
   domain_name TEXT NOT NULL UNIQUE,
   description_text TEXT,
-  icon REAL NOT NULL
+  favicon_png BLOB NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS service_accounts (

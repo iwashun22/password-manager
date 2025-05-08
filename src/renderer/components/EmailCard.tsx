@@ -1,10 +1,15 @@
-import { useState, useEffect, useCallback } from 'preact/hooks';
-import { Eye, EyeClosed, Copy, SquarePen, Trash } from 'lucide-preact';
+import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
+import { Eye, EyeClosed, Copy, SquarePen, Trash, X, Check } from 'lucide-preact';
 import Confirmation from './Confirmation';
 import Toast from './Toast';
 import { triggerUpdate } from '@/utils/triggers';
+import { logoutSignal } from './InactivityHandler';
+import FormInputText from './FormInput/Text';
+import { signal } from '@preact/signals';
 
 import './EmailCard.scss';
+
+const authenticatedBeforeModify = signal(-1);
 
 function EmailCard({ id, email, encrypted_password, password_length }: EmailProp) {
   const [decrypted, setDecrypted] = useState('');
@@ -19,12 +24,12 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
       const success = await window.user.requestDecryptedPassword(encrypted_password, 'copy');
 
       if (success) {
-        setToastMessage('copied to the clipboard');
+        setToastMessage('Password copied');
         setError(false);
         setShowToast(true);
       }
       else {
-        setToastMessage('failed to copy');
+        setToastMessage('Failed to copy');
         setError(true);
         setShowToast(true);
       }
@@ -37,6 +42,18 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
 
   const openConfirmation = useCallback(() => {
     setShowConfirmation(true);
+  }, []);
+
+  const authenticateBeforeEdit = useCallback(() => {
+    const authenticatedIndex = authenticatedBeforeModify.value;
+    if (authenticatedIndex < 0 || authenticatedIndex !== id) {
+      authenticatedBeforeModify.value = id;
+      logoutSignal.value = true;
+    }
+    else {
+      authenticatedBeforeModify.value = id;
+      console.log('authenticated');
+    }
   }, []);
 
   const deleteEmail = useCallback(() => {
@@ -78,7 +95,7 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
         const decrypted = await window.user.requestDecryptedPassword(encrypted_password, 'get');
 
         if (!decrypted) {
-          setToastMessage('failed to decrypt password');
+          setToastMessage('Failed to decrypt password');
           setError(true);
           setShowToast(true);
           setDecrypted('?'.repeat(password_length));
@@ -97,6 +114,14 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
     }
   }, [visible]);
 
+  if (authenticatedBeforeModify.value === id) return (
+    <ModifyCard
+      id={id}
+      email={email}
+      encrypted_password={encrypted_password}
+    />
+  )
+
   return (
     <>
     {
@@ -114,7 +139,7 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
         onCancel={() => setShowConfirmation(false)}
         type='danger'
       >
-        <h2>Hello world</h2>
+        <h3>Are you sure you want to delete this email?</h3>
       </Confirmation>
     }
     <div className="email-card-container">
@@ -147,11 +172,84 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
         </div>
       </div>
       <div className="modification-button">
-        <button>
+        <button onClick={authenticateBeforeEdit}>
           <SquarePen className="icon edit"/>
         </button>
         <button onClick={openConfirmation}>
           <Trash className="icon delete"/>
+        </button>
+      </div>
+    </div>
+    </>
+  )
+}
+
+function ModifyCard({ id, email, encrypted_password }: Omit<EmailProp, 'password_length'>) {
+  const newPasswordRef = useRef<HTMLInputElement>(null);
+  const [previousPassword, setPreviousPassword] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (newPasswordRef.current) {
+          const decrypted = await window.user.requestDecryptedPassword(encrypted_password, 'get') as string;
+          newPasswordRef.current.value = decrypted;
+          setPreviousPassword(decrypted);
+        }
+      }
+      catch(err) {
+        console.error(err);
+      }
+    })();
+  }, []);
+
+  const updatePassword = useCallback(() => {
+    // TODO:
+    (async () => {
+      if (!newPasswordRef.current) return;
+
+      if (previousPassword === newPasswordRef.current.value) return;
+
+      try {
+        const info = await window.db.editEmailAccount(id, newPasswordRef.current.value);
+        console.log(info);
+        authenticatedBeforeModify.value = -1;
+        triggerUpdate();
+      }
+      catch (err) {
+        console.log(err);
+      }
+    })();
+  }, [previousPassword]);
+
+  return (
+    <>
+    <div className="email-card-container">
+      <div className="email">
+        <p>Email:</p>
+        <h3>{ email }</h3>
+      </div>
+      <div className="password">
+        <p>New Password:</p>
+        <span className="password-edit-container">
+          <FormInputText
+            inputRef={newPasswordRef}
+            type="password"
+          />
+        </span>
+      </div>
+      <div className="modification-button">
+        <button
+          className="discard"
+          onClick={() => { authenticatedBeforeModify.value = -1; }}
+        >
+          <X className="icon"/>
+        </button>
+        <button
+          className="proceed"
+          onClick={updatePassword}
+        >
+          <Check className="icon"/>
         </button>
       </div>
     </div>

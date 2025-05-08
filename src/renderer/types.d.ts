@@ -7,6 +7,7 @@ declare global {
       createEmailAccount: (email: string, password: string) => Promise<any>;
       getAllEmailAccounts: () => Promise<Array<EmailProp>>;
       getAllServiceAccounts: (linkedEmailId?: number) => Promise<Array<ServiceAccountProp> | null>;
+      editEmailAccount: (emailId: number, newPassword: string) => Promise<Object | null>;
       deleteEmailAccount: (emailId: number) => Promise<Object | null>;
       deleteAllData: () => Promise<void>;
     };
@@ -31,6 +32,15 @@ declare global {
     email_id: number | null,
     service_id: number,
     encrypted_password: string,
+  }
+
+  interface ServiceProp {
+    id: number,
+    service_name: string,
+    domain_name: string,
+    description_text: Text,
+    icon: Buffer,
+    account_number: number,
   }
 }
 

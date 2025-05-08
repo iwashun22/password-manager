@@ -7,6 +7,7 @@ const {
   createEmailAccount,
   createServiceAccount,
   getAllEmailAccounts,
+  getAllServices,
   getAllServiceAccounts,
   editEmailAccount,
   deleteEmailAccount,
@@ -24,6 +25,7 @@ const isDev = !app.isPackaged;
 ipcMain.handle('db:create-email-acc', createEmailAccount);
 ipcMain.handle('db:create-service-acc', createServiceAccount);
 ipcMain.handle('db:get-all-email-accs', getAllEmailAccounts);
+ipcMain.handle('db:get-all-services', getAllServices);
 ipcMain.handle('db:get-all-service-accs', getAllServiceAccounts);
 ipcMain.handle('db:edit-email-acc', editEmailAccount);
 ipcMain.handle('db:delete-email-acc', deleteEmailAccount);

@@ -3,7 +3,7 @@
   display: inline-block;
   border-radius: 15px;
   overflow: hidden;
-  width: 270px;
+  min-width: 270px;
   margin: 10px;
 
   .email, .password {
@@ -13,9 +13,10 @@
     p {
       font-size: 14px;
       text-transform: capitalize;
+      padding-bottom: 12px;
     }
 
-    h3, h4 {
+    h4 {
       margin-left: 20px;
     }
   }
@@ -26,6 +27,7 @@
   }
   .password {
     background-color: #6495ED;
+    min-height: 110px;
 
     .buttons-container {
       text-align: end;
@@ -49,6 +51,13 @@
         }
       }
     }
+
+    .password-edit-container {
+      display: inline-block;
+      height: 34px;
+      width: 100%;
+      text-align: center;
+    }
   }
 
   .modification-button {
@@ -60,7 +69,8 @@
       text-align: center;
 
       .icon {
-        display: inline-block;
+        display: block;
+        margin: auto;
       }
 
       &:hover {
@@ -70,6 +80,27 @@
         .icon.delete {
           color: #CD5C5C;
         }
+      }
+    }
+
+    button.discard {
+      border-top-right-radius: 0;
+      border-top-left-radius: 0;
+      border-bottom-right-radius: 0;
+      background-color: #CD5C5C;
+
+      &:hover {
+        background-color: #cb4747;
+      }
+    }
+    button.proceed {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      border-bottom-left-radius: 0;
+      background-color: #8FBC8B;
+
+      &:hover {
+        background-color: #7fc479;
       }
     }
   }

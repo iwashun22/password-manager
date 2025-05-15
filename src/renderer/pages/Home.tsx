@@ -11,7 +11,7 @@ type Button = [
 
 const items: Array<Button> = [
   ['email accounts', '/email', Mail],
-  ['service accounts', '/service', UserRound],
+  ['service accounts', '/services/dashboard', UserRound],
   ['settings', '/settings', Settings],
 ]
 

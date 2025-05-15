@@ -1,21 +1,23 @@
 import { RefObject } from 'preact';
-import { useState, useCallback, Dispatch } from 'preact/hooks';
+import { useState, useCallback } from 'preact/hooks';
 import { Eye, EyeClosed } from 'lucide-preact';
 
 import './index.scss';
 
 interface Props {
   inputRef: RefObject<HTMLInputElement>,
-  type?: 'text' | 'password',
+  type?: 'text' | 'password' | 'url',
   placeholder?: string,
   disabled?: boolean,
+  value?: string,
 }
 
 function FormInputText({
   inputRef,
   type = 'text',
   placeholder = 'placeholder',
-  disabled = false
+  disabled = false,
+  value = '',
 }: Props) {
   const isPassword = type === 'password';
   const [visible, setVisible] = useState(false);
@@ -38,6 +40,12 @@ function FormInputText({
     setVisible(false);
   }, []);
 
+  const toLowercase = useCallback(() => {
+    if (!inputRef.current) return;
+
+    inputRef.current.value = inputRef.current.value.toLowerCase();
+  }, []);
+
   return (
     <span className="input-wrapper">
       <input
@@ -46,7 +54,10 @@ function FormInputText({
         className="form-input"
         placeholder={placeholder}
         onFocusOut={hide}
+        defaultValue={value}
+        onInput={type === 'url' ? toLowercase : () => {}}
         disabled={disabled}
+        data-type-url={type === 'url'}
       />
       { isPassword &&
         <span
@@ -61,6 +72,25 @@ function FormInputText({
           }
         </span>
       }
+    </span>
+  )
+}
+
+interface TextAreaProps {
+  inputRef: RefObject<HTMLTextAreaElement>
+  placeholder?: string,
+  value?: string,
+}
+
+export function FormTextArea({ inputRef, placeholder = 'description', value = '' }: TextAreaProps) {
+  return (
+    <span className="form-text-area-wrapper">
+      <textarea
+        ref={inputRef}
+        placeholder={placeholder}
+        defaultValue={value}
+      >
+      </textarea>
     </span>
   )
 }

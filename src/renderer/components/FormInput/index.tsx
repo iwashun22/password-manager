@@ -1,4 +1,5 @@
-import { FormEvent, PropsWithChildren } from 'preact/compat';
+import type { FormEvent, PropsWithChildren, RefObject } from 'preact/compat';
+import { useCallback } from 'preact/compat';
 
 import './index.scss';
 
@@ -19,6 +20,31 @@ function FormContainer(props: PropsWithChildren<Props>) {
         { props.children }
       </form>
     </span>
+  )
+}
+
+export function ButtonContainer(props: PropsWithChildren) {
+  return (
+    <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
+      { props.children }
+    </div>
+  )
+}
+
+export function LabelText({
+  text,
+  labelFor
+}: {
+  text: string,
+  labelFor: RefObject<HTMLInputElement>
+}) {
+  const focus = useCallback(() => {
+    labelFor.current?.focus();
+  }, []);
+  return (
+    <label className="label-text" onClick={focus}>
+      { text }
+    </label>
   )
 }
 

@@ -7,7 +7,7 @@ import ShowRecoveryKey from './pages/ShowRecoveryKey';
 import Authenticate from './pages/Authenticate';
 import ForceDelete from './pages/ForceDelete';
 import Email from './pages/Email';
-import Service from './pages/Service';
+import Services from './pages/Services';
 import Settings from './pages/Settings';
 import './app.scss';
 
@@ -36,7 +36,7 @@ export function App() {
         <Route path="/auth" component={Authenticate} />
         <Route path="/force-delete" component={ForceDelete} />
         <Route path="/email" component={Email} />
-        <Route path="/service" component={Service} />
+        <Route path="/services/*" component={Services}/>
         <Route path="/settings" component={Settings} />
       </Router>
     </LocationProvider>

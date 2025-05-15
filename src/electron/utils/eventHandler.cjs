@@ -68,9 +68,12 @@ async function getAllServices(event) {
         GROUP BY service_id
       ) AS s ON s.service_id = services.id
     `);
+    const data = statement.all();
+    return data;
   }
   catch (err) {
     console.log(err);
+    return null;
   }
 }
 

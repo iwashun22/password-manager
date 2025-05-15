@@ -6,6 +6,7 @@ declare global {
     db: {
       createEmailAccount: (email: string, password: string) => Promise<any>;
       getAllEmailAccounts: () => Promise<Array<EmailProp>>;
+      getAllServices: () => Promise<Array<ServiceProp> | null>
       getAllServiceAccounts: (linkedEmailId?: number) => Promise<Array<ServiceAccountProp> | null>;
       editEmailAccount: (emailId: number, newPassword: string) => Promise<Object | null>;
       deleteEmailAccount: (emailId: number) => Promise<Object | null>;
@@ -40,7 +41,7 @@ declare global {
     domain_name: string,
     description_text: Text,
     icon: Buffer,
-    account_number: number,
+    count: number,
   }
 }
 

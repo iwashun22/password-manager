@@ -192,7 +192,7 @@ function AccountForm({ backButtonOnClick }: {
   return (
     <>
       <BackButton onClick={backButtonOnClick}/>
-      <FormContainer onSubmit={() => {}} headerText='account'>
+      <FormContainer onSubmit={e => { e.preventDefault() }} headerText='account'>
         <FormInputText
           inputRef={usernameRef}
           placeholder='username'

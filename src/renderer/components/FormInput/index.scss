@@ -119,16 +119,25 @@ $input-color: #fffcc3;
     width: 100%;
     transform: translateY(100%);
     text-align: start;
-    background-color: #444;
     border-radius: $input-border-radius;
+    overflow: hidden;
     
     .item {
       user-select: none;
       cursor: pointer;
       padding: 4px 12px;
+      display: block;
+      width: 100%;
+      border-radius: 0;
+      text-align: left;
+      background-color: #444;
 
-      &[data-is-targeted], &:hover {
+      &[data-is-targeted] {
         color: #93C572;
+      }
+
+      &:hover {
+        background-color: #333;
       }
     }
   }

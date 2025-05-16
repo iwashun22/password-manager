@@ -5,9 +5,12 @@ declare global {
   interface Window {
     db: {
       createEmailAccount: (email: string, password: string) => Promise<any>;
+      createService: <T extends string>(serviceName: T, domain: T, description: T) => Promise<ArrayBuffer>
       getAllEmailAccounts: () => Promise<Array<EmailProp>>;
+      getEmailAccount: (email: string | number) => Promise<EmailProp | undefined>;
       getAllServices: () => Promise<Array<ServiceProp> | null>
       getAllServiceAccounts: (linkedEmailId?: number) => Promise<Array<ServiceAccountProp> | null>;
+      getOAuthProviders: () => Promise<Array<string>>;
       editEmailAccount: (emailId: number, newPassword: string) => Promise<Object | null>;
       deleteEmailAccount: (emailId: number) => Promise<Object | null>;
       deleteAllData: () => Promise<void>;

@@ -25,7 +25,7 @@ function FormContainer(props: PropsWithChildren<Props>) {
 
 export function ButtonContainer(props: PropsWithChildren) {
   return (
-    <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
+    <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginTop: '12px' }}>
       { props.children }
     </div>
   )

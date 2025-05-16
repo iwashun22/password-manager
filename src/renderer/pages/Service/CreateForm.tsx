@@ -5,12 +5,14 @@ import FormInputSelect from '@/components/FormInput/CustomSelect';
 import FormInputText, { FormTextArea } from '@/components/FormInput/Text';
 import FormInputSubmit from '@/components/FormInput/Submit';
 import FormBackButton from '@/components/FormInput/BackButton';
+import Switch from '@/components/Switch';
 import BackButton from '@/components/BackButton';
 import Toast from '@/components/Toast';
 import { useLocation } from 'preact-iso';
 import { signal } from '@preact/signals';
-import { checkValidDomain } from '@/utils/helper';
+import { checkValidDomain, matchEmailPattern } from '@/utils/helper';
 
+import './CreateForm.scss';
 
 const savedServiceName = signal('');
 const savedServiceDomainName = signal('');
@@ -93,7 +95,9 @@ function CreateForm() {
     }
 
     savedServiceDomainName.value = domainName.current.value;
-    savedServiceDescription.value = description.current.value;
+    const longText = description.current.value;
+    const trimmed = longText.trim().replace('\n', ' ').replace(/\s+/g, ' ');
+    savedServiceDescription.value = trimmed;
 
     readyToAddAccount.value = true;
   }, []);
@@ -170,18 +174,29 @@ function CreateForm() {
   )
 }
 
+const DEFAULT_OAUTH_PROVIDERS = ['APPLE', 'GITHUB', 'GOOGLE'];
 function AccountForm({ backButtonOnClick }: {
   backButtonOnClick: () => void
 }) {
+  const location = useLocation();
   const [emailAccounts, setEmailAccounts] = useState<Array<EmailProp>>([]);
-  const usernameRef = useRef(null);
-  const emailRef = useRef(null);
-  const passwordRef = useRef(null);
+  const [providers, setProviders] = useState(DEFAULT_OAUTH_PROVIDERS);
+  const [checkOAuth, setCheckOAuth] = useState(false);
+  const usernameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const oAuthRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     (async () => {
-      const data = await window.db.getAllEmailAccounts();
-      setEmailAccounts(data);
+      const emailData = await window.db.getAllEmailAccounts();
+      setEmailAccounts(emailData);
+
+      const providerData = await window.db.getOAuthProviders();
+      if (providerData.length > 0) {
+        setProviders(providerData);
+      }
     })();
   }, []);
 
@@ -189,10 +204,92 @@ function AccountForm({ backButtonOnClick }: {
     readyToAddAccount.value = false;
   }, []);
 
+  const handleSubmit = useCallback((e: FormEvent) => {
+    e.preventDefault();
+
+    (async () => {
+
+    if (!usernameRef.current || !emailRef.current || !passwordRef.current || !oAuthRef.current)
+      return;
+
+    const [val_user, val_email, val_password, val_oauth] = [usernameRef, emailRef, passwordRef, oAuthRef].map(ref => ref.current!.value);
+
+    // New service
+    if (choseServiceId.value === -1) {
+      // TODO:
+      // choseServiceId.value =
+      const data = await window.db.createService(
+        savedServiceName.value,
+        savedServiceDomainName.value,
+        savedServiceDescription.value
+      );
+      const blob = new Blob([data], { type: 'image/png' });
+      const url = URL.createObjectURL(blob);
+
+      console.log(url);
+      URL.revokeObjectURL(url);
+    }
+
+    if (checkOAuth) {
+      // Handle OAuth
+    }
+    else {
+      // Handle Account with Password
+      if (!val_user && !val_email) {
+        setError('No account was provided');
+        return;
+      }
+      else if (!val_password) {
+        setError('No password was provided');
+        return;
+      }
+
+      const emailAcc = matchEmailPattern(val_email);
+
+      if (emailAcc === undefined && !val_user) {
+        setError('Invalid email format');
+        return;
+      }
+
+      if (emailAcc !== undefined) {
+        const emailExist = await window.db.getEmailAccount(emailAcc.email);
+        if (emailExist === undefined) {
+          setError("This email does not exist");
+          return;
+        }
+
+        // TODO:
+        // const serviceAccountAlreadyCreated = await ;
+
+      }
+      else {
+
+      }
+    }
+
+    })();
+  }, [checkOAuth]);
+
+  useEffect(() => {
+    if (checkOAuth) {
+      passwordRef.current!.value = '';
+    } else {
+      oAuthRef.current!.value = '';
+    }
+  }, [checkOAuth]);
+
   return (
     <>
+      {
+        !!error &&
+        <Toast
+          message={error}
+          onClose={() => setError('')}
+          variant='error'
+        />
+      }
       <BackButton onClick={backButtonOnClick}/>
-      <FormContainer onSubmit={e => { e.preventDefault() }} headerText='account'>
+      <FormContainer onSubmit={handleSubmit} headerText='account'>
         <FormInputText
           inputRef={usernameRef}
           placeholder='username'
@@ -206,7 +303,26 @@ function AccountForm({ backButtonOnClick }: {
           inputRef={passwordRef}
           placeholder='password'
           type='password'
+          disabled={checkOAuth}
         />
+        <div className="checkbox-wrapper">
+          <div>
+            <Switch
+              state={checkOAuth}
+              setState={setCheckOAuth}
+              >
+              <i style={{ textTransform: 'capitalize' }}>
+                OAuth
+              </i>
+            </Switch>
+          </div>
+          <FormInputSelect
+            selectItems={providers}
+            inputRef={oAuthRef}
+            placeholder='provider'
+            disabled={!checkOAuth}
+          />
+        </div>
         <ButtonContainer>
           <FormBackButton
             text='back'

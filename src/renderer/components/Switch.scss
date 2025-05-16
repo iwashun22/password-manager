@@ -1,0 +1,76 @@
+$min-width: 60px;
+$height: 32px;
+$slider-padding: 4px;
+$border-radius: 6px;
+$duration: .2s;
+
+$no-check-bg: #333;
+$check-bg: #1DB954;
+$no-check-color: #303030;
+$check-color: white;
+$no-check-knob-color: #242424;
+$check-knob-color: white;
+
+.switch {
+  position: relative;
+  min-width: $min-width;
+  height: $height;
+  display: inline-block;
+  cursor: pointer;
+  z-index: 10;
+
+  .slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: $no-check-bg;
+    border-radius: $border-radius;
+    transition: $duration;
+
+    &::before {
+      $size: $height - calc($slider-padding * 2);
+      content: '';
+      height: $size;
+      width: $size;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: translate($slider-padding, $slider-padding);
+      background-color: $no-check-knob-color;
+      border-radius: $border-radius;
+      z-index: 1;
+      transition: $duration;
+    }
+  }
+
+  input {
+    display: none;
+  }
+
+  input:checked ~ .slider {
+    background-color: $check-bg;
+
+    &::before {
+      left: 100%;
+      transform: translate(- calc($height - $slider-padding), $slider-padding);
+      background-color: $check-knob-color;
+    }
+  }
+
+  .text {
+    position: relative;
+    user-select: none;
+    display: inline-block;
+    text-wrap: nowrap;
+    padding: $slider-padding;
+    padding-left: $height;
+    transition: $duration;
+  }
+
+  input:checked ~ .text {
+    padding-left: $slider-padding;
+    padding-right: $height;
+  }
+}

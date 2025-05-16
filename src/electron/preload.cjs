@@ -11,12 +11,18 @@ contextBridge.exposeInMainWorld('db', {
     ipcRenderer.invoke('db:create-email-acc', email, password),
   createServiceAccount: (emailId, username, password) =>
     ipcRenderer.invoke('db:create-service-acc', emailId, username, password),
+  createService: (serviceName, domain, description) =>
+    ipcRenderer.invoke('db:create-service', serviceName, domain, description),
   getAllEmailAccounts: () =>
     ipcRenderer.invoke('db:get-all-email-accs'),
+  getEmailAccount: (email) =>
+    ipcRenderer.invoke('db:get-email-account', email),
   getAllServices: () =>
     ipcRenderer.invoke('db:get-all-services'),
   getAllServiceAccounts: (linkedEmailId) =>
     ipcRenderer.invoke('db:get-all-service-accs', linkedEmailId),
+  getOAuthProviders: () =>
+    ipcRenderer.invoke('db:get-oauth-providers'),
   editEmailAccount: (emailId, newPassword) =>
     ipcRenderer.invoke('db:edit-email-acc', emailId, newPassword),
   deleteEmailAccount: (emailId) =>

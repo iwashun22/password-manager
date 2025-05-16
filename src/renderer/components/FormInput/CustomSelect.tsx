@@ -9,15 +9,20 @@ interface Props {
   inputRef: RefObject<HTMLInputElement>,
   placeholder?: string,
   value?: string,
+  disabled?: boolean
 }
 
 const MAX_SELECT_ITEMS = 3;
 
-function FormInputSelect({ selectItems, inputRef, placeholder = 'select', value = '' }: Props) {
+function FormInputSelect({ selectItems, inputRef, placeholder = 'select', value = '', disabled = false }: Props) {
   const [show, setShow] = useState(false);
-  const [matched, setMatched] = useState<typeof selectItems>([]);
+  const [matched, setMatched] = useState<typeof selectItems>([...selectItems]);
   const [range, setRange] = useState<[start: number, end: number]>([0, MAX_SELECT_ITEMS - 1]);
   const [selectIndex, setSelectIndex] = useState(-1);
+
+  useEffect(() => {
+    setMatched([...selectItems]);
+  }, [selectItems]);
 
   const moveCaretToEnd = useCallback(() => {
     if (!inputRef.current) return;
@@ -33,7 +38,7 @@ function FormInputSelect({ selectItems, inputRef, placeholder = 'select', value 
     const inputValue = inputRef.current?.value || '';
 
     if (!inputValue) {
-      setMatched([]);
+      setMatched([...selectItems]);
     }
     else {
       const regex = new RegExp(`^${inputValue}.+$`, "i");
@@ -80,6 +85,11 @@ function FormInputSelect({ selectItems, inputRef, placeholder = 'select', value 
         if (0 <= selectIndex && selectIndex <= matched.length - 1) {
           inputRef.current.value = matched[selectIndex];
           setShow(false);
+          e.preventDefault();
+        }
+        else {
+          setShow(false);
+          inputRef.current.blur();
         }
         break;
 
@@ -88,6 +98,13 @@ function FormInputSelect({ selectItems, inputRef, placeholder = 'select', value 
         break;
     }
   }, [selectIndex, matched]);
+
+  useEffect(() => {
+    if (!show) {
+      setSelectIndex(-1);
+      setRange([0, MAX_SELECT_ITEMS - 1]);
+    }
+  }, [show]);
 
   const selectHandler = useCallback((str: string) => {
     return (e: MouseEvent<HTMLElement>) => {
@@ -108,8 +125,10 @@ function FormInputSelect({ selectItems, inputRef, placeholder = 'select', value 
         ref={inputRef}
         className="form-input"
         placeholder={placeholder}
+        onFocus={() => setShow(true)}
         onInput={matchedItems}
         onKeyDown={keyboardNavigation}
+        disabled={disabled}
       />
       {
         show &&

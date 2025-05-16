@@ -39,6 +39,26 @@ async function getAllEmailAccounts() {
   }
 }
 
+async function getEmailAccount(event, email) {
+  try {
+    let data = undefined;
+    if (typeof email === 'number') {
+      const statement = db.prepare('SELECT * FROM email_accounts WHERE id = ?');
+      data = statement.get(email);
+    }
+    else {
+      const statement = db.prepare('SELECT * FROM email_accounts WHERE email = ?');
+      data = statement.get(email);
+    }
+
+    return data === undefined ? undefined : mapPasswordData(data);
+  }
+  catch (err) {
+    console.log(err);
+    return undefined;
+  }
+}
+
 async function getAllServiceAccounts(event, linkedEmailId = undefined) {
   try {
     if (typeof linkedEmailId === "number") {
@@ -59,7 +79,6 @@ async function getAllServiceAccounts(event, linkedEmailId = undefined) {
 
 async function getAllServices(event) {
   try {
-    // TODO:
     const statement = db.prepare(`
       SELECT services.*, s.count FROM services
       JOIN (
@@ -77,8 +96,37 @@ async function getAllServices(event) {
   }
 }
 
+async function createService(event, serviceName, domain, description) {
+  try {
+    const fetchUrl = `https://www.google.com/s2/favicons?domain=${domain}`;
+    const response = await fetch(fetchUrl);
+    // if (!response.ok) {
+
+    // }
+    const arrayBuffer = response.arrayBuffer();
+    return arrayBuffer;
+  }
+  catch (err) {
+    return -1;
+  }
+}
+
+async function getOAuthProviders() {
+  try {
+    const statement = db.prepare(`
+      SELECT oauth_provider FROM service_accounts
+      GROUP BY oauth_provider
+    `);
+    const data = statement.all();
+    return data.map(d => d['oauth_provider']);
+  }
+  catch (err) {
+    console.log(err);
+    return [];
+  }
+}
+
 async function editEmailAccount(event, emailId, newPassword) {
-  // TODO:
   try {
     const encrypted = defaultEncrypt(newPassword);
     const statement = db.prepare('UPDATE email_accounts SET encrypted_password = ? WHERE id = ?');
@@ -167,7 +215,7 @@ async function requestDecryptedPassword(event, encryptedPassword, request) {
   catch (err) {
     console.log(err);
     switch(request) {
-      case 'show':
+      case 'get':
         return '';
       case 'copy':
         return false;
@@ -182,9 +230,12 @@ async function getBackupData(event) {
 module.exports = {
   createEmailAccount,
   createServiceAccount,
+  createService,
   getAllEmailAccounts,
+  getEmailAccount,
   getAllServices,
   getAllServiceAccounts,
+  getOAuthProviders,
   editEmailAccount,
   deleteEmailAccount,
   deleteAllData,

@@ -58,6 +58,14 @@ $input-color: #fffcc3;
     &[data-type-url=true], &[data-type-url]::placeholder {
       text-transform: lowercase;
     }
+
+    &:disabled {
+      background-color: #333;
+
+      &::placeholder {
+        text-decoration: line-through;
+      }
+    }
   }
 
   &::before, &::after {
@@ -131,6 +139,7 @@ $input-color: #fffcc3;
       border-radius: 0;
       text-align: left;
       background-color: #444;
+      text-wrap: nowrap;
 
       &[data-is-targeted] {
         color: #93C572;

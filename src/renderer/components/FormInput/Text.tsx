@@ -59,7 +59,7 @@ function FormInputText({
         disabled={disabled}
         data-type-url={type === 'url'}
       />
-      { isPassword &&
+      { (isPassword && !disabled) &&
         <span
           className="toggle-visibility"
           onClick={toggleHandler}

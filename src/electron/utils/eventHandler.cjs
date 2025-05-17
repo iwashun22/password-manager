@@ -21,8 +21,24 @@ async function createEmailAccount(event, email, password) {
   }
 }
 
-async function createServiceAccount(event, emailId, username, encryptedPassword) {
+async function createServiceAccount(event, serviceId, emailId, username, password, oAuthProvider) {
   // TODO:
+  try {
+    const encrypted = defaultEncrypt(password);
+    const statement =  db.prepare(`
+      INSERT INTO service_accounts
+      (service_id, email_id, username, encrypted_password, oauth_provider)
+      VALUES
+      (?, ?, ?, ?, ?)
+      `);
+    const info = statement.run(serviceId, emailId, username, encrypted, oAuthProvider);
+
+    return info;
+  }
+  catch (err) {
+    console.log(err);
+    return null;
+  }
 }
 
 async function getAllEmailAccounts() {
@@ -77,6 +93,28 @@ async function getAllServiceAccounts(event, linkedEmailId = undefined) {
   }
 }
 
+async function getServiceAccount(event, serviceId, username, emailId, subaddress) {
+  try {
+    const emailIsNull = emailId === null;
+    const data = emailIsNull ?
+      db.prepare(`
+        SELECT * FROM service_accounts
+        WHERE service_id = ? AND username = ? AND emailId IS NULL
+      `).get(serviceId, username) :
+      db.prepare(`
+        SELECT * FROM service_accounts
+        WHERE service_id = ? AND email_id = ? AND subaddress = ?
+      `).get(serviceId, emailId, subaddress);
+
+    // undefined will be returned if there is no data
+    return data;
+  }
+  catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+
 async function getAllServices(event) {
   try {
     const statement = db.prepare(`
@@ -99,15 +137,20 @@ async function getAllServices(event) {
 async function createService(event, serviceName, domain, description) {
   try {
     const fetchUrl = `https://www.google.com/s2/favicons?domain=${domain}`;
-    const response = await fetch(fetchUrl);
-    // if (!response.ok) {
+    const iconResponse = await fetch(fetchUrl);
+    const arrayBuffer = iconResponse.ok ? await iconResponse.arrayBuffer() : null;
+    const buffer = arrayBuffer ? Buffer.from(arrayBuffer) : null;
 
-    // }
-    const arrayBuffer = response.arrayBuffer();
-    return arrayBuffer;
+    const statement = db.prepare(`
+      INSERT INTO services (service_name, domain_name, description_text, favicon_png)
+      VALUES (?, ?, ?, ?)
+    `);
+    const info = statement.run(serviceName, domain, description, buffer);
+    return info;
   }
   catch (err) {
-    return -1;
+    console.log(err);
+    return null;
   }
 }
 
@@ -235,6 +278,7 @@ module.exports = {
   getEmailAccount,
   getAllServices,
   getAllServiceAccounts,
+  getServiceAccount,
   getOAuthProviders,
   editEmailAccount,
   deleteEmailAccount,

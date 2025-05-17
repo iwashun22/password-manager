@@ -216,18 +216,18 @@ function AccountForm({ backButtonOnClick }: {
 
     // New service
     if (choseServiceId.value === -1) {
-      // TODO:
-      // choseServiceId.value =
-      const data = await window.db.createService(
+      const info = await window.db.createService(
         savedServiceName.value,
         savedServiceDomainName.value,
         savedServiceDescription.value
       );
-      const blob = new Blob([data], { type: 'image/png' });
-      const url = URL.createObjectURL(blob);
 
-      console.log(url);
-      URL.revokeObjectURL(url);
+      if (!info) {
+        setError('Something went wrong');
+        return;
+      }
+
+      choseServiceId.value = info.lastInsertRowid;
     }
 
     if (checkOAuth) {
@@ -259,8 +259,32 @@ function AccountForm({ backButtonOnClick }: {
         }
 
         // TODO:
-        // const serviceAccountAlreadyCreated = await ;
+        const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, '', emailExist.id, emailAcc.subaddress || '');
 
+        if (serviceAccountAlreadyCreated === null) {
+          setError('Something went wrong');
+          return;
+        }
+
+        if (serviceAccountAlreadyCreated !== undefined) {
+          console.log(serviceAccountAlreadyCreated);
+          setError('This account is already registered');
+          return;
+        }
+
+        const info = await window.db.createServiceAccount(
+          choseServiceId.value,
+          emailExist.id,
+          val_user,
+          val_password,
+          null
+        );
+        console.log(info);
+
+        if (info === null) {
+          setError('Something went wrong');
+          return;
+        }
       }
       else {
 

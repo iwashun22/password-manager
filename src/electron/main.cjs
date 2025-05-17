@@ -11,6 +11,7 @@ const {
   getEmailAccount,
   getAllServices,
   getAllServiceAccounts,
+  getServiceAccount,
   getOAuthProviders,
   editEmailAccount,
   deleteEmailAccount,
@@ -32,6 +33,7 @@ ipcMain.handle('db:get-all-email-accs', getAllEmailAccounts);
 ipcMain.handle('db:get-email-account', getEmailAccount);
 ipcMain.handle('db:get-all-services', getAllServices);
 ipcMain.handle('db:get-all-service-accs', getAllServiceAccounts);
+ipcMain.handle('db:get-service-account', getServiceAccount);
 ipcMain.handle('db:get-oauth-providers', getOAuthProviders);
 ipcMain.handle('db:edit-email-acc', editEmailAccount);
 ipcMain.handle('db:delete-email-acc', deleteEmailAccount);

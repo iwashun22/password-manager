@@ -214,6 +214,21 @@ function AccountForm({ backButtonOnClick }: {
 
     const [val_user, val_email, val_password, val_oauth] = [usernameRef, emailRef, passwordRef, oAuthRef].map(ref => ref.current!.value);
 
+    if (!val_user && !val_email) {
+      setError('No account was provided');
+      return;
+    }
+    else if (!val_password && !checkOAuth) {
+      setError('No password was provided');
+      return;
+    }
+
+    const emailAcc = matchEmailPattern(val_email);
+    if (emailAcc === undefined && val_email.length > 0) {
+      setError('Invalid email format');
+      return;
+    }
+
     // New service
     if (choseServiceId.value === -1) {
       const info = await window.db.createService(
@@ -235,21 +250,6 @@ function AccountForm({ backButtonOnClick }: {
     }
     else {
       // Handle Account with Password
-      if (!val_user && !val_email) {
-        setError('No account was provided');
-        return;
-      }
-      else if (!val_password) {
-        setError('No password was provided');
-        return;
-      }
-
-      const emailAcc = matchEmailPattern(val_email);
-
-      if (emailAcc === undefined && !val_user) {
-        setError('Invalid email format');
-        return;
-      }
 
       if (emailAcc !== undefined) {
         const emailExist = await window.db.getEmailAccount(emailAcc.email);
@@ -259,7 +259,7 @@ function AccountForm({ backButtonOnClick }: {
         }
 
         // TODO:
-        const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, '', emailExist.id, emailAcc.subaddress || '');
+        const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, '', emailExist.id, emailAcc.subaddress);
 
         if (serviceAccountAlreadyCreated === null) {
           setError('Something went wrong');
@@ -267,27 +267,43 @@ function AccountForm({ backButtonOnClick }: {
         }
 
         if (serviceAccountAlreadyCreated !== undefined) {
-          console.log(serviceAccountAlreadyCreated);
-          setError('This account is already registered');
+          setError('This email is already registered');
           return;
         }
 
         const info = await window.db.createServiceAccount(
           choseServiceId.value,
           emailExist.id,
+          emailAcc.subaddress,
           val_user,
           val_password,
           null
         );
-        console.log(info);
 
         if (info === null) {
-          setError('Something went wrong');
+          setError('Failed to add the account');
           return;
         }
       }
       else {
+        const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, val_user, null, null);
 
+        if (serviceAccountAlreadyCreated === null) {
+          setError('Something went wrong');
+          return;
+        }
+
+        if (serviceAccountAlreadyCreated !== undefined) {
+          setError('This username is already registered');
+          return;
+        }
+
+        const info = await window.db.createServiceAccount(choseServiceId.value, null, null, val_user, val_password, null);
+
+        if (info === null) {
+          setError('Failed to add the account');
+          return;
+        }
       }
     }
 

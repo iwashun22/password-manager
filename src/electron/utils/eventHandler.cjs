@@ -21,17 +21,17 @@ async function createEmailAccount(event, email, password) {
   }
 }
 
-async function createServiceAccount(event, serviceId, emailId, username, password, oAuthProvider) {
+async function createServiceAccount(event, serviceId, emailId, subaddress, username, password, oAuthProvider) {
   // TODO:
   try {
     const encrypted = defaultEncrypt(password);
     const statement =  db.prepare(`
       INSERT INTO service_accounts
-      (service_id, email_id, username, encrypted_password, oauth_provider)
+      (service_id, email_id, subaddress, username, encrypted_password, oauth_provider)
       VALUES
-      (?, ?, ?, ?, ?)
+      (?, ?, ?, ?, ?, ?)
       `);
-    const info = statement.run(serviceId, emailId, username, encrypted, oAuthProvider);
+    const info = statement.run(serviceId, emailId, subaddress || '', username, encrypted, oAuthProvider);
 
     return info;
   }
@@ -80,11 +80,13 @@ async function getAllServiceAccounts(event, linkedEmailId = undefined) {
     if (typeof linkedEmailId === "number") {
       const statement = db.prepare('SELECT * FROM service_accounts WHERE email_id = ?');
       const data = statement.all(linkedEmailId);
-      return data;
+      const mapped = data.map(mapPasswordData);
+      return mapped;
     }
 
     const statement = db.prepare('SELECT * FROM service_accounts');
     const data = statement.all();
+    const mapped = data.mpa(mapPasswordData);
     return data;
   }
   catch (err) {
@@ -104,7 +106,7 @@ async function getServiceAccount(event, serviceId, username, emailId, subaddress
       db.prepare(`
         SELECT * FROM service_accounts
         WHERE service_id = ? AND email_id = ? AND subaddress = ?
-      `).get(serviceId, emailId, subaddress);
+      `).get(serviceId, emailId, subaddress || '');
 
     // undefined will be returned if there is no data
     return data;
@@ -125,8 +127,22 @@ async function getAllServices(event) {
         GROUP BY service_id
       ) AS s ON s.service_id = services.id
     `);
+
     const data = statement.all();
-    return data;
+    const filtered = data.filter(v => v.count >= 1);
+
+    const removeUnusedService = db.prepare(`
+      DELETE FROM services
+      WHERE id = ?
+    `)
+    const del = db.transaction((arr) => {
+      for (const item of arr) {
+        if (item['count'] < 1) removeUnusedService.run(item['id']);
+      }
+    });
+    del(data);
+
+    return filtered;
   }
   catch (err) {
     console.log(err);

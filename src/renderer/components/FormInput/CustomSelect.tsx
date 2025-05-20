@@ -41,19 +41,21 @@ function FormInputSelect({ selectItems, inputRef, placeholder = 'select', value 
       setMatched([...selectItems]);
     }
     else {
-      const regex = new RegExp(`^${inputValue}.+$`, "i");
+      const regex = new RegExp(`^${inputValue}(.?)+$`, "i");
       const filtered = selectItems
         .filter(v => regex.test(v))
         .sort((a, b) => a.localeCompare(b));
       setMatched(filtered);
     }
 
+    setSelectIndex(-1);
     setRange([0, MAX_SELECT_ITEMS - 1]);
     setShow(true);
   }, [selectItems]);
 
   const keyboardNavigation = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
     if (!inputRef.current) return;
+    if (document.activeElement !== inputRef.current) return;
 
     switch(e.key) {
 
@@ -82,22 +84,24 @@ function FormInputSelect({ selectItems, inputRef, placeholder = 'select', value 
         break;
 
       case 'Enter':
+        e.preventDefault();
+        if (!show) {
+          inputRef.current.form!.requestSubmit();
+          return;
+        }
+
         if (0 <= selectIndex && selectIndex <= matched.length - 1) {
           inputRef.current.value = matched[selectIndex];
-          setShow(false);
-          e.preventDefault();
         }
-        else {
-          setShow(false);
-          inputRef.current.blur();
-        }
+
+        setShow(false);
         break;
 
       default:
         setSelectIndex(-1);
         break;
     }
-  }, [selectIndex, matched]);
+  }, [selectIndex, matched, show]);
 
   useEffect(() => {
     if (!show) {
@@ -125,7 +129,7 @@ function FormInputSelect({ selectItems, inputRef, placeholder = 'select', value 
         ref={inputRef}
         className="form-input"
         placeholder={placeholder}
-        onFocus={() => setShow(true)}
+        onFocus={matchedItems}
         onInput={matchedItems}
         onKeyDown={keyboardNavigation}
         disabled={disabled}
@@ -142,6 +146,7 @@ function FormInputSelect({ selectItems, inputRef, placeholder = 'select', value 
                   key={i}
                   data-is-targeted={i === selectIndex ? '' : undefined}
                   className="item"
+                  type="button"
                   onClick={selectHandler(v)}
                   >
                   <h3>{ v }</h3>

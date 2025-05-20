@@ -44,7 +44,6 @@ function encrypt(file) {
 
   const encrypted = Buffer.concat([cipher.update(buffer), cipher.final()]);
   const tag = cipher.getAuthTag();
-  console.log(tag);
 
   const combined = Buffer.concat([nonce, encrypted, tag]);
 

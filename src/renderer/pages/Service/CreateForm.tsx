@@ -7,10 +7,10 @@ import FormInputSubmit from '@/components/FormInput/Submit';
 import FormBackButton from '@/components/FormInput/BackButton';
 import Switch from '@/components/Switch';
 import BackButton from '@/components/BackButton';
-import Toast from '@/components/Toast';
 import { useLocation } from 'preact-iso';
 import { signal } from '@preact/signals';
 import { checkValidDomain, matchEmailPattern } from '@/utils/helper';
+import { setError } from '@/components/ErrorHandler';
 
 import './CreateForm.scss';
 
@@ -40,7 +40,6 @@ function backToFirstForm() {
 function CreateForm() {
   const location = useLocation();
   const [services, setServices] = useState<Array<ServiceProp>>([]);
-  const [error, setError] = useState('');
   const serviceName = useRef<HTMLInputElement>(null);
   const domainName = useRef<HTMLInputElement>(null);
   const description = useRef<HTMLTextAreaElement>(null);
@@ -60,7 +59,7 @@ function CreateForm() {
   const chooseService = useCallback((e: FormEvent) => {
     e.preventDefault();
     const name = serviceName.current?.value || '';
-    if (!name) return;
+    if (!name) return setError('No service name was provided');
 
     let included = false;
     services.forEach(s => {
@@ -110,14 +109,6 @@ function CreateForm() {
   if (describeService.value && !readyToAddAccount.value) return (
     <>
     <BackButton onClick={navigateBack}/>
-    {
-      !!error &&
-      <Toast
-        message={error}
-        variant='error'
-        onClose={() => setError('')}
-      />
-    }
     <FormContainer onSubmit={handleServiceInfo} headerText='info'>
       <LabelText
         text='domain name'
@@ -152,14 +143,6 @@ function CreateForm() {
 
   return (
     <>
-      {
-        !!error &&
-        <Toast
-          variant='error'
-          message={error}
-          onClose={() => setError('')}
-        />
-      }
       <BackButton onClick={navigateBack}/>
       <FormContainer onSubmit={chooseService} headerText='service name'>
         <FormInputSelect
@@ -186,7 +169,6 @@ function AccountForm({ backButtonOnClick }: {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const oAuthRef = useRef<HTMLInputElement>(null);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -320,14 +302,6 @@ function AccountForm({ backButtonOnClick }: {
 
   return (
     <>
-      {
-        !!error &&
-        <Toast
-          message={error}
-          onClose={() => setError('')}
-          variant='error'
-        />
-      }
       <BackButton onClick={backButtonOnClick}/>
       <FormContainer onSubmit={handleSubmit} headerText='account'>
         <FormInputText

@@ -2,12 +2,12 @@ import { useLocation } from 'preact-iso';
 import { FormEvent } from 'preact/compat';
 import { useState, useRef, useCallback, useEffect } from 'preact/hooks';
 import { signal } from '@preact/signals';
+import { setError } from '@/components/ErrorHandler';
 import BackButton from '@/components/BackButton';
 import SearchBar from '@/components/SearchBar';
 import FormContainer from '@/components/FormInput';
 import FormInputText from '@/components/FormInput/Text';
 import FormInputSubmit from '@/components/FormInput/Submit';
-import Toast from '@/components/Toast';
 import EmailCard from '@/components/EmailCard';
 import { matchEmailPattern } from '@/utils/helper.ts';
 import { refreshTrigger, triggerUpdate } from '@/utils/triggers';
@@ -82,7 +82,6 @@ function Email() {
 function EmailForm() {
   const emailAccountRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
-  const [error, setError] = useState('');
 
   const closeForm = useCallback(() => {
     formOpenSignal.value = false;
@@ -131,14 +130,6 @@ function EmailForm() {
 
   return (
     <>
-      {
-        !!error &&
-        <Toast
-          message={error}
-          onClose={() => setError('')}
-          variant='error'
-        />
-      }
       <BackButton onClick={closeForm}/>
       <FormContainer onSubmit={handleSubmit} headerText='new email account'>
         <FormInputText

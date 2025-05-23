@@ -11,6 +11,7 @@ import { useLocation } from 'preact-iso';
 import { signal } from '@preact/signals';
 import { checkValidDomain, matchEmailPattern } from '@/utils/helper';
 import { setError } from '@/components/ErrorHandler';
+import { triggerUpdate } from '@/utils/triggers';
 
 import './CreateForm.scss';
 
@@ -176,8 +177,9 @@ function AccountForm({ backButtonOnClick }: {
       setEmailAccounts(emailData);
 
       const providerData = await window.db.getOAuthProviders();
-      if (providerData.length > 0) {
-        setProviders(providerData);
+      const removeNull = providerData.filter(p => p !== null);
+      if (removeNull.length > 0) {
+        setProviders(removeNull);
       }
     })();
   }, []);
@@ -227,6 +229,7 @@ function AccountForm({ backButtonOnClick }: {
       choseServiceId.value = info.lastInsertRowid;
     }
 
+    let info: Info | null;
     if (checkOAuth) {
       // Handle OAuth
     }
@@ -240,7 +243,6 @@ function AccountForm({ backButtonOnClick }: {
           return;
         }
 
-        // TODO:
         const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, '', emailExist.id, emailAcc.subaddress);
 
         if (serviceAccountAlreadyCreated === null) {
@@ -253,7 +255,7 @@ function AccountForm({ backButtonOnClick }: {
           return;
         }
 
-        const info = await window.db.createServiceAccount(
+        info = await window.db.createServiceAccount(
           choseServiceId.value,
           emailExist.id,
           emailAcc.subaddress,
@@ -261,11 +263,6 @@ function AccountForm({ backButtonOnClick }: {
           val_password,
           null
         );
-
-        if (info === null) {
-          setError('Failed to add the account');
-          return;
-        }
       }
       else {
         const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, val_user, null, null);
@@ -280,13 +277,17 @@ function AccountForm({ backButtonOnClick }: {
           return;
         }
 
-        const info = await window.db.createServiceAccount(choseServiceId.value, null, null, val_user, val_password, null);
-
-        if (info === null) {
-          setError('Failed to add the account');
-          return;
-        }
+        info = await window.db.createServiceAccount(choseServiceId.value, null, null, val_user, val_password, null);
       }
+
+      if (info === null) {
+        setError('Failed to add the account');
+        return;
+      }
+
+      triggerUpdate();
+      clearAll();
+      location.route('/services/dashboard');
     }
 
     })();

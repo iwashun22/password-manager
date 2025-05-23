@@ -49,8 +49,8 @@ declare global {
     id: number,
     service_name: string,
     domain_name: string,
-    description_text: Text,
-    icon: Buffer,
+    description_text: string,
+    favicon_png: Buffer | null,
     count: number,
   }
 }

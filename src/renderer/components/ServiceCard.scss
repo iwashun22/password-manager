@@ -1,0 +1,14 @@
+.service-card-container {
+  background-color: pink;
+
+  .icon-container {
+    padding: 12px;
+    background-color: white;
+    display: inline-block;
+
+    .favicon {
+      width: 30px;
+      height: 30px;
+    }
+  }
+}

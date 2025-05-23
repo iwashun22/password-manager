@@ -18,7 +18,7 @@ function allow() {
 function ShowRecoveryKey() {
   const location = useLocation();
   const key = recoveryKeySignal.value;
-  // Y73dWK+mnZjUQ8nz
+  // 2gqZC5QLNu0ReZYK
   const keySpanRef = useRef<HTMLSpanElement>(null);
 
   const [showToast, setShowToast] = useState(false);

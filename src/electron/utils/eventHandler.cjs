@@ -120,8 +120,8 @@ async function getServiceAccount(event, serviceId, username, emailId, subaddress
 async function getAllServices(event) {
   try {
     const statement = db.prepare(`
-      SELECT services.*, s.count FROM services
-      JOIN (
+      SELECT services.*, IFNULL(s.count, 0) AS count FROM services
+      LEFT JOIN (
         SELECT service_id, COUNT(*) AS count
           FROM service_accounts
         GROUP BY service_id
@@ -137,6 +137,7 @@ async function getAllServices(event) {
     `)
     const del = db.transaction((arr) => {
       for (const item of arr) {
+        console.log(item);
         if (item['count'] < 1) removeUnusedService.run(item['id']);
       }
     });
@@ -155,7 +156,9 @@ async function createService(event, serviceName, domain, description) {
     const fetchUrl = `https://www.google.com/s2/favicons?domain=${domain}`;
     const iconResponse = await fetch(fetchUrl);
     const arrayBuffer = iconResponse.ok ? await iconResponse.arrayBuffer() : null;
+    console.log(arrayBuffer);
     const buffer = arrayBuffer ? Buffer.from(arrayBuffer) : null;
+    console.log(buffer.length);
 
     const statement = db.prepare(`
       INSERT INTO services (service_name, domain_name, description_text, favicon_png)

@@ -22,16 +22,15 @@ async function createEmailAccount(event, email, password) {
 }
 
 async function createServiceAccount(event, serviceId, emailId, subaddress, username, password, oAuthProvider) {
-  // TODO:
   try {
-    const encrypted = defaultEncrypt(password);
+    const encrypted = password ? defaultEncrypt(password) : '';
     const statement =  db.prepare(`
       INSERT INTO service_accounts
       (service_id, email_id, subaddress, username, encrypted_password, oauth_provider)
       VALUES
       (?, ?, ?, ?, ?, ?)
       `);
-    const info = statement.run(serviceId, emailId, subaddress || '', username, encrypted, oAuthProvider);
+    const info = statement.run(serviceId, emailId, subaddress || '', username, encrypted, oAuthProvider || '');
 
     return info;
   }
@@ -55,16 +54,16 @@ async function getAllEmailAccounts() {
   }
 }
 
-async function getEmailAccount(event, email) {
+async function getEmailAccount(event, emailId) {
   try {
     let data = undefined;
-    if (typeof email === 'number') {
+    if (typeof emailId === 'number') {
       const statement = db.prepare('SELECT * FROM email_accounts WHERE id = ?');
-      data = statement.get(email);
+      data = statement.get(emailId);
     }
     else {
       const statement = db.prepare('SELECT * FROM email_accounts WHERE email = ?');
-      data = statement.get(email);
+      data = statement.get(emailId);
     }
 
     return data === undefined ? undefined : mapPasswordData(data);
@@ -75,7 +74,7 @@ async function getEmailAccount(event, email) {
   }
 }
 
-async function getAllServiceAccounts(event, linkedEmailId = undefined) {
+async function getServiceAccountsLinkedToEmail(event, linkedEmailId = undefined) {
   try {
     if (typeof linkedEmailId === "number") {
       const statement = db.prepare('SELECT * FROM service_accounts WHERE email_id = ?');
@@ -95,18 +94,30 @@ async function getAllServiceAccounts(event, linkedEmailId = undefined) {
   }
 }
 
-async function getServiceAccount(event, serviceId, username, emailId, subaddress) {
+async function getServiceAccountsById(event, serviceId) {
+  try {
+    const statement = db.prepare('SELECT * FROM service_accounts WHERE service_id = ?');
+    const data = statement.all(serviceId);
+    return data;
+  }
+  catch(err) {
+    console.log(err);
+    return null;
+  }
+}
+
+async function getServiceAccount(event, serviceId, username, emailId, subaddress, oauthProvider) {
   try {
     const emailIsNull = emailId === null;
     const data = emailIsNull ?
       db.prepare(`
         SELECT * FROM service_accounts
-        WHERE service_id = ? AND username = ? AND emailId IS NULL
+        WHERE service_id = ? AND username = ? AND email_id IS NULL
       `).get(serviceId, username) :
       db.prepare(`
         SELECT * FROM service_accounts
-        WHERE service_id = ? AND email_id = ? AND subaddress = ?
-      `).get(serviceId, emailId, subaddress || '');
+        WHERE service_id = ? AND email_id = ? AND subaddress = ? AND oauth_provider = ?
+      `).get(serviceId, emailId, subaddress || '', oauthProvider || '');
 
     // undefined will be returned if there is no data
     return data;
@@ -126,6 +137,7 @@ async function getAllServices(event) {
           FROM service_accounts
         GROUP BY service_id
       ) AS s ON s.service_id = services.id
+      ORDER BY services.service_name COLLATE NOCASE
     `);
 
     const data = statement.all();
@@ -137,7 +149,6 @@ async function getAllServices(event) {
     `)
     const del = db.transaction((arr) => {
       for (const item of arr) {
-        console.log(item);
         if (item['count'] < 1) removeUnusedService.run(item['id']);
       }
     });
@@ -156,9 +167,7 @@ async function createService(event, serviceName, domain, description) {
     const fetchUrl = `https://www.google.com/s2/favicons?domain=${domain}`;
     const iconResponse = await fetch(fetchUrl);
     const arrayBuffer = iconResponse.ok ? await iconResponse.arrayBuffer() : null;
-    console.log(arrayBuffer);
     const buffer = arrayBuffer ? Buffer.from(arrayBuffer) : null;
-    console.log(buffer.length);
 
     const statement = db.prepare(`
       INSERT INTO services (service_name, domain_name, description_text, favicon_png)
@@ -296,8 +305,9 @@ module.exports = {
   getAllEmailAccounts,
   getEmailAccount,
   getAllServices,
-  getAllServiceAccounts,
+  getServiceAccountsLinkedToEmail,
   getServiceAccount,
+  getServiceAccountsById,
   getOAuthProviders,
   editEmailAccount,
   deleteEmailAccount,

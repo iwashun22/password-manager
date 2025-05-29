@@ -10,8 +10,9 @@ declare global {
       getAllEmailAccounts: () => Promise<Array<EmailProp>>;
       getEmailAccount: (email: string | number) => Promise<EmailProp | undefined>;
       getAllServices: () => Promise<Array<ServiceProp> | null>
-      getAllServiceAccounts: (linkedEmailId?: number) => Promise<Array<ServiceAccountProp> | null>;
-      getServiceAccount: (serviceId: number, username: string, emailId: number | null, subaddress: string | null) => Promise<ServiceAccountProp | undefined | null>
+      getServiceAccountsLinkedToEmail: (linkedEmailId?: number) => Promise<Array<ServiceAccountProp> | null>;
+      getServiceAccount: (serviceId: number, username: string, emailId: number | null, subaddress: string | null, oauthProvider: string) => Promise<ServiceAccountProp | undefined | null>;
+      getServiceAccountsById: (serviceId: number) => Promise<Array<ServiceAccountProp> | null>;
       getOAuthProviders: () => Promise<Array<string>>;
       editEmailAccount: (emailId: number, newPassword: string) => Promise<Object | null>;
       deleteEmailAccount: (emailId: number) => Promise<Object | null>;
@@ -41,7 +42,9 @@ declare global {
     id: number,
     username: string | null,
     email_id: number | null,
+    subaddress: string,
     service_id: number,
+    oauth_provider: string,
     encrypted_password: string,
   }
 

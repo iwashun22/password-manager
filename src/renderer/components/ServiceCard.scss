@@ -1,14 +1,80 @@
+$card-inner-padding: 12px;
+$account-number-size: 24px;
+$card-color: #DAA06D;
+$card-hover-color: #E3963E;
+
 .service-card-container {
-  background-color: pink;
+  background-color: $card-color;
+  width: 400px;
+  margin: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 10px;
+  cursor: pointer;
 
-  .icon-container {
-    padding: 12px;
-    background-color: white;
-    display: inline-block;
+  &:hover {
+    background-color: $card-hover-color;
+  }
 
-    .favicon {
-      width: 30px;
-      height: 30px;
+  .favicon-container {
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 14px;
+
+    span {
+      padding: $card-inner-padding;
+      background-color: white;
+      display: block;
+
+      .favicon {
+        display: block;
+        width: 30px;
+        height: 30px;
+        color: gray;
+      }
+    }
+  }
+
+  .context-container {
+    flex: 1;
+    padding: $card-inner-padding;
+    text-align: left;
+
+    .name {
+      font-size: 22px;
+      // background: linear-gradient(to right, #CD7F32, transparent);
+      background-color: #DAA06D;
+      padding-inline: 10px;
+      border-radius: 8px;
+    }
+
+    .description {
+      font-size: 16px;
+      padding: 8px 10px;
+    }
+
+    .accounts-number {
+      display: block;
+      text-align: right;
+      margin-top: 6px;
+
+      i {
+        font-size: 18px;
+        margin-right: 8px;
+      }
+
+      .number {
+        display: inline-block;
+        width: $account-number-size;
+        height: $account-number-size;
+        padding: 4px;
+        box-sizing: content-box;
+        border-radius: 50%;
+        background-color: red;
+        text-align: center;
+        user-select: none;
+      }
     }
   }
 }

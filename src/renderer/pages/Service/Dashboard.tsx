@@ -65,7 +65,9 @@ function ServicesDashboard() {
           serviceList
             .filter(sv => sv.service_name.toLowerCase().startsWith(searchValue.toLowerCase()))
             .map((sv, i) => (
-              <ServiceCard key={i} {...sv} />
+              <div className="spacing">
+                <ServiceCard key={i} {...sv} />
+              </div>
             ))
         }
       </div>

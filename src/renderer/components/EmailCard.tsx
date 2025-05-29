@@ -65,7 +65,7 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
 
     (async () => {
       setShowConfirmation(false);
-      const servicesWithThisEmail = await window.db.getAllServiceAccounts(id);
+      const servicesWithThisEmail = await window.db.getServiceAccountsLinkedToEmail(id);
 
       if (servicesWithThisEmail === null) {
         unexpectedError();

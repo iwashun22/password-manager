@@ -18,11 +18,11 @@ import './CreateForm.scss';
 const savedServiceName = signal('');
 const savedServiceDomainName = signal('');
 const savedServiceDescription = signal('');
-const choseServiceId = signal(-1);
 const describeService = signal(false);
 const readyToAddAccount = signal(false);
+export const choseServiceId = signal(-1);
 
-function clearAll() {
+export function clearAll() {
   savedServiceName.value = '';
   savedServiceDomainName.value = '';
   savedServiceDescription.value = '';
@@ -159,7 +159,7 @@ function CreateForm() {
 }
 
 const DEFAULT_OAUTH_PROVIDERS = ['APPLE', 'GITHUB', 'GOOGLE'];
-function AccountForm({ backButtonOnClick }: {
+export function AccountForm({ backButtonOnClick }: {
   backButtonOnClick: () => void
 }) {
   const location = useLocation();
@@ -177,7 +177,7 @@ function AccountForm({ backButtonOnClick }: {
       setEmailAccounts(emailData);
 
       const providerData = await window.db.getOAuthProviders();
-      const removeNull = providerData.filter(p => p !== null);
+      const removeNull = providerData.filter(p => p.length);
       if (removeNull.length > 0) {
         setProviders(removeNull);
       }
@@ -198,7 +198,7 @@ function AccountForm({ backButtonOnClick }: {
 
     const [val_user, val_email, val_password, val_oauth] = [usernameRef, emailRef, passwordRef, oAuthRef].map(ref => ref.current!.value);
 
-    if (!val_user && !val_email) {
+    if ((!val_user && !val_email) || (!val_email && checkOAuth)) {
       setError('No account was provided');
       return;
     }
@@ -232,6 +232,37 @@ function AccountForm({ backButtonOnClick }: {
     let info: Info | null;
     if (checkOAuth) {
       // Handle OAuth
+      if (!val_oauth) {
+        setError('No OAuth provider was specified');
+        return;
+      }
+
+      const emailExist = await window.db.getEmailAccount(emailAcc!.email);
+      if (emailExist === undefined) {
+        setError('This email does not exist');
+        return;
+      }
+      else if (emailAcc!.subaddress) {
+        setError('Subaddressing is not allowed');
+        return;
+      }
+
+      const oauthProvider = providers.filter(
+        p => p.toLowerCase() === val_oauth.toLowerCase()
+      )[0] || val_oauth;
+
+      const serviceAccountExist = await window.db.getServiceAccount(choseServiceId.value, '', emailExist.id, '', oauthProvider);
+
+      if (serviceAccountExist === null) {
+        setError('Something went wrong');
+        return;
+      }
+      if (serviceAccountExist !== undefined) {
+        setError('This account is already registered');
+        return;
+      }
+
+      info = await window.db.createServiceAccount(choseServiceId.value, emailExist.id, null, '', '', oauthProvider);
     }
     else {
       // Handle Account with Password
@@ -243,13 +274,12 @@ function AccountForm({ backButtonOnClick }: {
           return;
         }
 
-        const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, '', emailExist.id, emailAcc.subaddress);
+        const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, '', emailExist.id, emailAcc.subaddress, '');
 
         if (serviceAccountAlreadyCreated === null) {
           setError('Something went wrong');
           return;
         }
-
         if (serviceAccountAlreadyCreated !== undefined) {
           setError('This email is already registered');
           return;
@@ -265,7 +295,7 @@ function AccountForm({ backButtonOnClick }: {
         );
       }
       else {
-        const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, val_user, null, null);
+        const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, val_user, null, null, '');
 
         if (serviceAccountAlreadyCreated === null) {
           setError('Something went wrong');
@@ -279,12 +309,12 @@ function AccountForm({ backButtonOnClick }: {
 
         info = await window.db.createServiceAccount(choseServiceId.value, null, null, val_user, val_password, null);
       }
+    }
 
-      if (info === null) {
-        setError('Failed to add the account');
-        return;
-      }
-
+    if (info === null) {
+      setError('Failed to add the account');
+    }
+    else {
       triggerUpdate();
       clearAll();
       location.route('/services/dashboard');

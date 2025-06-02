@@ -44,6 +44,8 @@ contextBridge.exposeInMainWorld('user', {
     ipcRenderer.invoke('user:verify-password', password),
   requestDecryptedPassword: (encryptedPassword, request) =>
     ipcRenderer.invoke('user:request-decrypted-password', encryptedPassword, request),
+  formattingEmail: (emailId, subaddress) =>
+    ipcRenderer.invoke('user:formatting-email', emailId, subaddress),
 });
 
 contextBridge.exposeInMainWorld('backup', {

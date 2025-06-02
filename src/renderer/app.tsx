@@ -2,6 +2,7 @@ import { LocationProvider, Router, Route } from 'preact-iso';
 import InactivityHandler from './components/InactivityHandler';
 import LockButton from './components/LockButton';
 import ErrorHandler from './components/ErrorHandler';
+import SuccessLogHandler from './components/SuccessLogHandler';
 import Home from './pages/Home';
 import WelcomePage from './pages/WelcomePage';
 import ShowRecoveryKey from './pages/ShowRecoveryKey';
@@ -31,6 +32,7 @@ export function App() {
         ]}
       />
       <ErrorHandler />
+      <SuccessLogHandler />
       <Router>
         <Route path="/" component={Home} />
         <Route path="/welcome" component={WelcomePage} />

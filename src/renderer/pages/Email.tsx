@@ -15,19 +15,27 @@ import { refreshTrigger, triggerUpdate } from '@/utils/triggers';
 import './Email.scss';
 
 const formOpenSignal = signal(false);
+const emailSearchSignal = signal('');
+const lastViewedServiceId = signal(-1);
+
+export const setSignalSearchValue = (email: string) => {
+  emailSearchSignal.value = email;
+}
+
+export const setLastViewedServiceId = (id: number) => {
+  lastViewedServiceId.value = id;
+}
 
 const filterSearchValue = (searchString: string) => (data: EmailProp) => {
   const email = data['email'];
-  const regex = new RegExp(searchString, "i");
-
-  const match = email.match(regex);
-  return match !== null;
+  return email.toLowerCase().startsWith(searchString.toLowerCase());
 }
 
 function Email() {
   const location = useLocation();
   const searchRef = useRef<HTMLInputElement>(null);
   const [searchValue, setSearchValue] = useState('');
+  const [navigatedFromService, setNavigatedFromService] = useState(false);
   const [emailData, setEmailData] = useState<Array<EmailProp>>([]);
 
   const updateList = useCallback(() => {
@@ -38,8 +46,15 @@ function Email() {
   }, []);
 
   const navigateHome = useCallback(() => {
-    location.route('/');
-  }, []);
+    const path = (navigatedFromService && lastViewedServiceId.value !== -1) ?
+    `/services/${lastViewedServiceId.value}` : '/';
+
+    setNavigatedFromService(false);
+    setLastViewedServiceId(-1);
+    setSignalSearchValue('');
+
+    location.route(path);
+  }, [navigatedFromService]);
 
   const handleSearch = useCallback((e: FormEvent) => {
     e.preventDefault();
@@ -54,6 +69,19 @@ function Email() {
   useEffect(() => {
     updateList();
   }, [refreshTrigger.value]);
+
+  // Trigger when navigated from Service page
+  useEffect(() => {
+    if (emailSearchSignal.value) {
+      setSearchValue(emailSearchSignal.value);
+      setNavigatedFromService(true);
+      searchRef.current!.value = emailSearchSignal.value;
+    }
+    else {
+      searchRef.current!.value = '';
+      setSearchValue('');
+    }
+  }, [emailSearchSignal.value]);
 
   if (formOpenSignal.value) return (
     <EmailForm/>
@@ -70,9 +98,15 @@ function Email() {
       />
       <div className="container">
       {
-        emailData.filter(filterSearchValue(searchValue)).map((v, i) => (
-          <EmailCard {...v} key={i} />
-        ))
+        emailData.length  === 0 ?
+         <h2 className="bg-text">No email data to display</h2>
+        :
+          emailData.filter(filterSearchValue(searchValue)).length === 0 ?
+            <h2 className="bg-text">No emails match the search query.</h2>
+          :
+            emailData.filter(filterSearchValue(searchValue)).map((v, i) => (
+              <EmailCard {...v} key={i} />
+            ))
       }
       </div>
     </>

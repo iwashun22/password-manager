@@ -8,14 +8,14 @@ interface Props {
   onSearch: (e: FormEvent) => void,
   onAddNew: (e: MouseEvent<HTMLButtonElement>) => void,
   searchRef: RefObject<HTMLInputElement>
-  placeholder?: string
+  placeholder?: string,
 }
 
 function SearchBar({ 
   onSearch,
   onAddNew,
   searchRef,
-  placeholder = 'Search'
+  placeholder = 'Search',
 }: Props) {
 
   return (

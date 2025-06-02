@@ -85,8 +85,8 @@ async function getServiceAccountsLinkedToEmail(event, linkedEmailId = undefined)
 
     const statement = db.prepare('SELECT * FROM service_accounts');
     const data = statement.all();
-    const mapped = data.mpa(mapPasswordData);
-    return data;
+    const mapped = data.map(mapPasswordData);
+    return mapped;
   }
   catch (err) {
     console.log(err);
@@ -98,7 +98,8 @@ async function getServiceAccountsById(event, serviceId) {
   try {
     const statement = db.prepare('SELECT * FROM service_accounts WHERE service_id = ?');
     const data = statement.all(serviceId);
-    return data;
+    const mapped = data.map(mapPasswordData);
+    return mapped;
   }
   catch(err) {
     console.log(err);
@@ -294,6 +295,23 @@ async function requestDecryptedPassword(event, encryptedPassword, request) {
   }
 }
 
+async function formattingEmail(event, emailId, subaddress) {
+  try {
+    const emailData = await getEmailAccount(null, emailId);
+    if (emailData === undefined) {
+      throw new Error('Email account not found');
+    }
+
+    const [name, domain] = emailData.email.split('@');
+    const formattedEmail = subaddress ? `${name}+${subaddress}@${domain}` : emailData.email;
+    return formattedEmail;
+  }
+  catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+
 async function getBackupData(event) {
   // TODO:
 }
@@ -317,4 +335,5 @@ module.exports = {
   requestDecryptedPassword,
   getBackupData,
   storePassword,
+  formattingEmail,
 }

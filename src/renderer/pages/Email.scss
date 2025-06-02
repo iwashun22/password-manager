@@ -1,6 +1,9 @@
-.container {
-  height: 70vh;
-  padding: 20px 0;
+@use '../styles/mixins' as *;
 
-  overflow-y: scroll;
+.container {
+  @include scroll-container();
+
+  .bg-text {
+    @include secondary-background-text();
+  }
 }

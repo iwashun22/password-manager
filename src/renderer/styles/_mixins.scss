@@ -1,7 +1,32 @@
+@use './fonts' as *;
+
 @mixin button() {
   padding: 5px 20px;
   font-size: 22px;
   text-align: center;
   min-width: 160px;
   border-radius: 10px;
+}
+
+@mixin scroll-container() {
+  height: 70vh;
+  padding: 20px 0;
+  overflow-y: scroll;
+
+  scrollbar-width: thin;
+  scrollbar-color: #B3D1F7 transparent;
+
+  &::-webkit-scrollbar-button {
+    display: none;
+    height: 0;
+    width: 0;
+  }
+}
+
+@mixin secondary-background-text() {
+  color: #606060;
+  font-size: 20px;
+  padding: 10px 0;
+
+  @include fw-medium;
 }

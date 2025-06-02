@@ -6,6 +6,8 @@ import { triggerUpdate } from '@/utils/triggers';
 import { logoutSignal } from './InactivityHandler';
 import FormInputText from './FormInput/Text';
 import { signal } from '@preact/signals';
+import { setMessage } from './SuccessLogHandler';
+import { setError } from './ErrorHandler';
 
 import './EmailCard.scss';
 
@@ -14,30 +16,34 @@ const authenticatedBeforeModify = signal(-1);
 function EmailCard({ id, email, encrypted_password, password_length }: EmailProp) {
   const [decrypted, setDecrypted] = useState('');
   const [visible, setVisible] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [error, setError] = useState(false);
 
   const copyToClipboard = useCallback(() => {
     (async () => {
       const success = await window.user.requestDecryptedPassword(encrypted_password, 'copy');
 
       if (success) {
-        setToastMessage('Password copied');
-        setError(false);
-        setShowToast(true);
+        setMessage('Password copied to clipboard');
       }
       else {
-        setToastMessage('Failed to copy');
-        setError(true);
-        setShowToast(true);
+        setError('Failed to copy password to clipboard');
       }
     })();
   }, []);
 
   const showPassword = useCallback(() => {
-    setVisible(v => !v);
+    (async () => {
+      const decryptedPassword = await window.user.requestDecryptedPassword(encrypted_password, 'get');
+
+      if (decryptedPassword) {
+        setVisible(v => !v);
+        setDecrypted(decryptedPassword);
+      }
+      else {
+        setError('Failed to decrypt password');
+        return;
+      }
+    })();
   }, []);
 
   const openConfirmation = useCallback(() => {
@@ -58,9 +64,7 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
 
   const deleteEmail = useCallback(() => {
     function unexpectedError() {
-      setError(true);
-      setShowToast(true);
-      setToastMessage('Some thing went wrong');
+      setError('Some thing went wrong');
     }
 
     (async () => {
@@ -72,9 +76,7 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
         return;
       }
       else if (servicesWithThisEmail.length > 0) {
-        setError(true);
-        setShowToast(true);
-        setToastMessage('Some services are using this email');
+        setError('Some services are using this email');
         return;
       }
 
@@ -84,33 +86,14 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
         return;
       }
 
-      console.log(info);
+      // console.log(info);
       triggerUpdate();
     })();
   }, []);
 
   useEffect(() => {
-    if (visible) {
-      (async () => {
-        const decrypted = await window.user.requestDecryptedPassword(encrypted_password, 'get');
-
-        if (!decrypted) {
-          setToastMessage('Failed to decrypt password');
-          setError(true);
-          setShowToast(true);
-          setDecrypted('?'.repeat(password_length));
-        }
-        else {
-          setDecrypted(decrypted);
-        }
-      })()
-    }
-    else {
-      setDecrypted('');
-    }
-
-    return () => {
-      setDecrypted('');
+    if (!visible) {
+      setDecrypted(''); // Clear decrypted password when not visible
     }
   }, [visible]);
 
@@ -124,14 +107,6 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
 
   return (
     <>
-    {
-      showToast &&
-      <Toast
-        message={toastMessage}
-        onClose={() => setShowToast(false)}
-        variant={error ? 'error' : 'success'}
-      />
-    }
     {
       showConfirmation &&
       <Confirmation

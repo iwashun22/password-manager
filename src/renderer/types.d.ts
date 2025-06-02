@@ -23,6 +23,7 @@ declare global {
       storePassword: (password: string) => Promise<string>;
       verifyPassword: (password: string) => Promise<boolean>;
       requestDecryptedPassword: <T extends RequestType>(encryptedPassword: string, request: T) => Promise<DecryptReturn<T>>;
+      formattingEmail: (emailId: number, subaddress: string) => Promise<string | null>;
     };
   }
 
@@ -46,6 +47,7 @@ declare global {
     service_id: number,
     oauth_provider: string,
     encrypted_password: string,
+    password_length: number,
   }
 
   interface ServiceProp {

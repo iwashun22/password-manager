@@ -22,6 +22,7 @@ const {
   getBackupData,
   storePassword,
   deleteAllData,
+  formattingEmail
 } = require('./utils/eventHandler.cjs');
 const { getOrCreateKey } = require('./utils/helper.cjs');
 
@@ -45,6 +46,7 @@ ipcMain.handle('user:get-system-pw', getSystemPassword);
 ipcMain.handle('user:store-password', storePassword);
 ipcMain.handle('user:verify-password', verifyPassword);
 ipcMain.handle('user:request-decrypted-password', requestDecryptedPassword);
+ipcMain.handle('user:formatting-email', formattingEmail);
 
 //TODO:
 ipcMain.handle('backup:get-backup-data', getBackupData);

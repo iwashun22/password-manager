@@ -65,4 +65,4 @@ declare global {
 }
 
 type RequestType = "copy" | "get";
-type DecryptReturn<T extends RequestType> = T extends "copy" ? boolean : string | undefined;
+type DecryptReturn<T extends RequestType> = T extends "copy" ? boolean : string;

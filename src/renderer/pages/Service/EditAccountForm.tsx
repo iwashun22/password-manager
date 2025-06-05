@@ -7,7 +7,9 @@ import FormInputText from '@/components/FormInput/Text';
 import FormInputSelect from '@/components/FormInput/CustomSelect';
 import FormBackButton from '@/components/FormInput/BackButton';
 import FormInputSubmit from '@/components/FormInput/Submit';
+import { editAccountId } from '@/utils/triggers';
 
+const DASHBOARD_URL = '/services/dashboard';
 
 function EditAccountForm() {
   const location = useLocation();
@@ -16,13 +18,19 @@ function EditAccountForm() {
   const accountId = Number(route.params['id']);
 
   const [serviceId, setServiceId] = useState(-1);
+  const [emails, setEmails] = useState<string[]>([]);
   const [serviceName, setServiceName] = useState('');
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [subaddress, setSubaddress] = useState('');
-  const [password, setPassword] = useState('');
 
   const usernameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    (async () => {
+      const emailAccounts = await window.db.getAllEmailAccounts();
+      setEmails(emailAccounts.map(acc => acc.email));
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -30,11 +38,19 @@ function EditAccountForm() {
 
       if (account === null) {
         setError('Account not found');
-        location.route('/services/dashboard');
+        location.route(DASHBOARD_URL);
         return;
       }
 
-      const { email_id, service_id, subaddress, encrypted_password } = account[0];
+      const { username, email_id, service_id, subaddress, encrypted_password, oauth_provider } = account[0];
+
+      if (oauth_provider) {
+        location.route(DASHBOARD_URL);
+        return;
+      }
+
+      const decrypted = await window.user.requestDecryptedPassword(encrypted_password, 'get');
+      passwordRef.current!.value = decrypted;
 
       const service = await window.db.getAllServices(service_id);
       if (service === null) {
@@ -50,14 +66,21 @@ function EditAccountForm() {
       if (email_id) {
         const emailAccount = await window.db.getEmailAccount(email_id);
         if (emailAccount) {
-          setEmail(emailAccount.email);
+          const [emailName, domain] = emailAccount.email.split('@');
+          emailRef.current!.value = subaddress ?
+            `${emailName}+${subaddress}@${domain}` : emailAccount.email;
         }
+      }
+
+      if (username) {
+        usernameRef.current!.value = username;
       }
 
     })();
   }, [accountId]);
 
   const navgiateBack = useCallback(() => {
+    editAccountId(-1);
     const path = `/services/${serviceId}`;
     location.route(path);
   }, [serviceId]);
@@ -65,10 +88,23 @@ function EditAccountForm() {
   return (
     <>
       <BackButton onClick={navgiateBack}/>
-      <FormContainer onSubmit={() => {}}>
+      <FormContainer
+        onSubmit={() => {}}
+        headerText={`edit ${serviceName} account`}
+      >
         <FormInputText
           placeholder='username'
           inputRef={usernameRef}
+        />
+        <FormInputSelect
+          placeholder='email'
+          selectItems={emails}
+          inputRef={emailRef}
+        />
+        <FormInputText
+          placeholder='password'
+          type='password'
+          inputRef={passwordRef}
         />
         <ButtonContainer>
           <FormBackButton text='cancel' onClick={navgiateBack} />

@@ -1,17 +1,15 @@
 import { useCallback, useState, useEffect } from 'preact/hooks';
-import { signal } from '@preact/signals';
 import { setMessage } from './SuccessLogHandler';
 import { setError } from './ErrorHandler';
 import { triggerUpdate } from '@/utils/triggers';
-import { logoutSignal, previousPath } from './InactivityHandler';
+import { logoutSignal } from './InactivityHandler';
 import { setSignalSearchValue, setLastViewedServiceId } from '@/pages/Email';
 import { Copy, Eye, EyeClosed } from 'lucide-preact';
 import { useLocation } from 'preact-iso';
+import { editAccountId } from '@/utils/triggers';
 import Confirmation from './Confirmation';
 
 import './ServiceAccountCard.scss';
-
-const authenticatedBeforeModify = signal(-1);
 
 function ServiceAccountCard({
   id,
@@ -116,15 +114,9 @@ function ServiceAccountCard({
   }, []);
 
   const navigateToEdit = useCallback(() => {
-    if (authenticatedBeforeModify.value !== id) {
-      authenticatedBeforeModify.value = id;
-      logoutSignal.value = true;
-      return;
-    }
-
-    const path = `/services/edit/${id}`;
-    location.route(path);
-    authenticatedBeforeModify.value = -1;
+    editAccountId(id);
+    logoutSignal.value = true;
+    return;
   }, [id]);
 
   return (

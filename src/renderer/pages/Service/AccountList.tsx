@@ -5,6 +5,7 @@ import { setError } from '@/components/ErrorHandler';
 import ServiceAccountCard from '@/components/ServiceAccountCard';
 import { Settings } from 'lucide-preact';
 import { refreshTrigger } from '@/utils/triggers';
+import { modifyAccountSignal } from '@/utils/triggers';
 
 import './AccountList.scss';
 
@@ -60,6 +61,11 @@ function AccountList() {
   const navigateToDashboard = useCallback(() => {
     location.route(DASHBOARD_URL);
   }, []);
+
+  if (modifyAccountSignal.value !== -1) {
+    const path = `/services/edit/${modifyAccountSignal.value}`;
+    location.route(path);
+  }
 
   return (
     <>

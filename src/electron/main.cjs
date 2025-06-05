@@ -16,13 +16,15 @@ const {
   getOAuthProviders,
   editEmailAccount,
   deleteEmailAccount,
+  deleteServiceAccount,
   getSystemPassword,
   verifyPassword,
   requestDecryptedPassword,
   getBackupData,
   storePassword,
   deleteAllData,
-  formattingEmail
+  formattingEmail,
+  retryFetchFavicon
 } = require('./utils/eventHandler.cjs');
 const { getOrCreateKey } = require('./utils/helper.cjs');
 
@@ -40,13 +42,16 @@ ipcMain.handle('db:get-service-accs-by-id', getServiceAccountsById);
 ipcMain.handle('db:get-oauth-providers', getOAuthProviders);
 ipcMain.handle('db:edit-email-acc', editEmailAccount);
 ipcMain.handle('db:delete-email-acc', deleteEmailAccount);
+ipcMain.handle('db:delete-service-acc', deleteServiceAccount);
 ipcMain.handle('db:delete-all-data', deleteAllData);
 
 ipcMain.handle('user:get-system-pw', getSystemPassword);
 ipcMain.handle('user:store-password', storePassword);
 ipcMain.handle('user:verify-password', verifyPassword);
 ipcMain.handle('user:request-decrypted-password', requestDecryptedPassword);
+ipcMain.handle('user:retry-fetch-favicon', retryFetchFavicon);
 ipcMain.handle('user:formatting-email', formattingEmail);
+ipcMain.handle('user:save-database', encryptDB);
 
 //TODO:
 ipcMain.handle('backup:get-backup-data', getBackupData);

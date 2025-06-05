@@ -1,7 +1,7 @@
 import { useLocation } from 'preact-iso';
 import { FormEvent } from 'preact/compat';
 import { useState, useRef, useCallback, useEffect } from 'preact/hooks';
-import { signal } from '@preact/signals';
+import { signal, useSignalEffect } from '@preact/signals';
 import { setError } from '@/components/ErrorHandler';
 import BackButton from '@/components/BackButton';
 import SearchBar from '@/components/SearchBar';
@@ -46,7 +46,7 @@ function Email() {
   }, []);
 
   const navigateHome = useCallback(() => {
-    const path = (navigatedFromService && lastViewedServiceId.value !== -1) ?
+    const path = (navigatedFromService && (lastViewedServiceId.value !== -1)) ?
     `/services/${lastViewedServiceId.value}` : '/';
 
     setNavigatedFromService(false);
@@ -71,17 +71,18 @@ function Email() {
   }, [refreshTrigger.value]);
 
   // Trigger when navigated from Service page
-  useEffect(() => {
+  useSignalEffect(() => {
+    if (searchRef.current === null) return;
+
+    if (lastViewedServiceId.value !== -1) {
+      setNavigatedFromService(true);
+    }
+
     if (emailSearchSignal.value) {
       setSearchValue(emailSearchSignal.value);
-      setNavigatedFromService(true);
-      searchRef.current!.value = emailSearchSignal.value;
+      searchRef.current.value = emailSearchSignal.value;
     }
-    else {
-      searchRef.current!.value = '';
-      setSearchValue('');
-    }
-  }, [emailSearchSignal.value]);
+  });
 
   if (formOpenSignal.value) return (
     <EmailForm/>

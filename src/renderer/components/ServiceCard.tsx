@@ -18,14 +18,23 @@ function ServiceCard({
 
   useEffect(() => {
     let url: string;
+    const MIME_TYPE = 'image/png';
     if (favicon_png !== null) {
-      const blob = new Blob([favicon_png], { type: 'image/png' });
+      const blob = new Blob([favicon_png], { type: MIME_TYPE });
       url = URL.createObjectURL(blob);
 
       setImageUrl(url);
     }
     else {
-      // TODO: Retry getting the favicon image from domain_name
+      (async () => {
+        const retryResponse = await window.user.retryFetchFavicon(id, domain_name);
+
+        if (retryResponse === null) return;
+
+        const blob = new Blob([retryResponse], { type: MIME_TYPE });
+        url = URL.createObjectURL(blob);
+        setImageUrl(url);
+      })();
     }
 
     return () => {
@@ -38,7 +47,7 @@ function ServiceCard({
       <div className="favicon-container">
         <span>
           {
-            favicon_png === null ?
+            !imageUrl ?
             <Globe className="favicon"/>
             :
             <img src={imageUrl} alt="service-favicon" className="favicon"/>

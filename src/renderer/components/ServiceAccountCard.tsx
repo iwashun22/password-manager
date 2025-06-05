@@ -1,13 +1,20 @@
 import { useCallback, useState, useEffect } from 'preact/hooks';
+import { signal } from '@preact/signals';
 import { setMessage } from './SuccessLogHandler';
 import { setError } from './ErrorHandler';
+import { triggerUpdate } from '@/utils/triggers';
+import { logoutSignal, previousPath } from './InactivityHandler';
 import { setSignalSearchValue, setLastViewedServiceId } from '@/pages/Email';
 import { Copy, Eye, EyeClosed } from 'lucide-preact';
 import { useLocation } from 'preact-iso';
+import Confirmation from './Confirmation';
 
 import './ServiceAccountCard.scss';
 
+const authenticatedBeforeModify = signal(-1);
+
 function ServiceAccountCard({
+  id,
   service_id,
   username,
   email_id,
@@ -20,6 +27,7 @@ function ServiceAccountCard({
   const [email, setEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const togglePasswordVisibility = useCallback(() => {
     (async () => {
@@ -89,7 +97,48 @@ function ServiceAccountCard({
     })();
   }, []);
 
+  const deleteAccount = useCallback(() => {
+    (async () => {
+      const info = await window.db.deleteServiceAccount(id);
+
+      if (info === null) {
+        setError('Failed to delete service account');
+        return;
+      }
+
+      setShowConfirmation(false);
+      triggerUpdate();
+    })();
+  }, []);
+
+  const openConfirmation = useCallback(() => {
+    setShowConfirmation(true);
+  }, []);
+
+  const navigateToEdit = useCallback(() => {
+    if (authenticatedBeforeModify.value !== id) {
+      authenticatedBeforeModify.value = id;
+      logoutSignal.value = true;
+      return;
+    }
+
+    const path = `/services/edit/${id}`;
+    location.route(path);
+    authenticatedBeforeModify.value = -1;
+  }, [id]);
+
   return (
+    <>
+    {
+      showConfirmation &&
+      <Confirmation
+        type='danger'
+        onConfirm={deleteAccount}
+        onCancel={() => setShowConfirmation(false)}
+      >
+        <h3>Are you sure you want to delete this account?</h3>
+      </Confirmation>
+    }
     <div className="service-account-card">
       {
         !!username && (
@@ -119,7 +168,7 @@ function ServiceAccountCard({
 
       {
         password_length > 0 && (
-          <div className="wrapper password">
+          <div className="wrapper">
             <h3>password</h3>
             <p>
               { 
@@ -147,12 +196,19 @@ function ServiceAccountCard({
         <button
           className="btn edit"
           disabled={!!oauth_provider}
+          onClick={navigateToEdit}
         >
           edit
         </button>
-        <button className="btn delete">delete</button>
+        <button
+          className="btn delete" 
+          onClick={openConfirmation}
+        >
+          delete
+        </button>
       </div>
     </div>
+    </>
   )
 }
 

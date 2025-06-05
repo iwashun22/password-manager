@@ -9,13 +9,15 @@ declare global {
       createService: <T extends string>(serviceName: T, domain: T, description: T) => Promise<Info | null>;
       getAllEmailAccounts: () => Promise<Array<EmailProp>>;
       getEmailAccount: (email: string | number) => Promise<EmailProp | undefined>;
-      getAllServices: () => Promise<Array<ServiceProp> | null>
+      getAllServices: <T extends number | undefined>(id?: T) =>
+        T extends number ? Promise<ServiceProp | null> : Promise<Array<ServiceProp> | null>;
       getServiceAccountsLinkedToEmail: (linkedEmailId?: number) => Promise<Array<ServiceAccountProp> | null>;
       getServiceAccount: (serviceId: number, username: string, emailId: number | null, subaddress: string | null, oauthProvider: string) => Promise<ServiceAccountProp | undefined | null>;
-      getServiceAccountsById: (serviceId: number) => Promise<Array<ServiceAccountProp> | null>;
+      getServiceAccountsById: (id: number, id_type: 'service' | 'account') => Promise<Array<ServiceAccountProp> | null>;
       getOAuthProviders: () => Promise<Array<string>>;
       editEmailAccount: (emailId: number, newPassword: string) => Promise<Object | null>;
-      deleteEmailAccount: (emailId: number) => Promise<Object | null>;
+      deleteEmailAccount: (emailId: number) => Promise<Info | null>;
+      deleteServiceAccount: (serviceId: number) => Promise<Info | null>;
       deleteAllData: () => Promise<void>;
     };
     user: {
@@ -24,6 +26,8 @@ declare global {
       verifyPassword: (password: string) => Promise<boolean>;
       requestDecryptedPassword: <T extends RequestType>(encryptedPassword: string, request: T) => Promise<DecryptReturn<T>>;
       formattingEmail: (emailId: number, subaddress: string) => Promise<string | null>;
+      retryFetchFavicon: (serviceId: number, domain: string) => Promise<Buffer | null>;
+      saveDatabase: () => Promise<void>;
     };
   }
 

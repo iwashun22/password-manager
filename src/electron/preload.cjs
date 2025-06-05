@@ -17,20 +17,22 @@ contextBridge.exposeInMainWorld('db', {
     ipcRenderer.invoke('db:get-all-email-accs'),
   getEmailAccount: (email) =>
     ipcRenderer.invoke('db:get-email-account', email),
-  getAllServices: () =>
-    ipcRenderer.invoke('db:get-all-services'),
+  getAllServices: (id) =>
+    ipcRenderer.invoke('db:get-all-services', id),
   getServiceAccountsLinkedToEmail: (linkedEmailId) =>
     ipcRenderer.invoke('db:get-service-accs-linked-to-email', linkedEmailId),
   getServiceAccount: (...args) =>
     ipcRenderer.invoke('db:get-service-account', ...args),
-  getServiceAccountsById: (serviceId) => 
-    ipcRenderer.invoke('db:get-service-accs-by-id', serviceId),
+  getServiceAccountsById: (id, id_type) => 
+    ipcRenderer.invoke('db:get-service-accs-by-id', id, id_type),
   getOAuthProviders: () =>
     ipcRenderer.invoke('db:get-oauth-providers'),
   editEmailAccount: (emailId, newPassword) =>
     ipcRenderer.invoke('db:edit-email-acc', emailId, newPassword),
   deleteEmailAccount: (emailId) =>
     ipcRenderer.invoke('db:delete-email-acc', emailId),
+  deleteServiceAccount: (serviceId) =>
+    ipcRenderer.invoke('db:delete-service-acc', serviceId),
   deleteAllData: () =>
     ipcRenderer.invoke('db:delete-all-data'),
 });
@@ -44,8 +46,12 @@ contextBridge.exposeInMainWorld('user', {
     ipcRenderer.invoke('user:verify-password', password),
   requestDecryptedPassword: (encryptedPassword, request) =>
     ipcRenderer.invoke('user:request-decrypted-password', encryptedPassword, request),
+  retryFetchFavicon: (serviceId, domain) =>
+    ipcRenderer.invoke('user:retry-fetch-favicon', serviceId, domain),
   formattingEmail: (emailId, subaddress) =>
     ipcRenderer.invoke('user:formatting-email', emailId, subaddress),
+  saveDatabase: () =>
+    ipcRenderer.invoke('user:save-database'),
 });
 
 contextBridge.exposeInMainWorld('backup', {

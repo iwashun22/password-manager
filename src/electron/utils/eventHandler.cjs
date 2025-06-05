@@ -1,6 +1,6 @@
 const { db } = require('./initData.cjs');
 const { defaultEncrypt, defaultDecrypt, generateKey, separateIV } = require('./encryption.cjs');
-const { hashPassword, comparePassword, mapPasswordData } = require('./helper.cjs');
+const { hashPassword, comparePassword, mapPasswordData, faviconUrl } = require('./helper.cjs');
 const { clipboard } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -94,10 +94,24 @@ async function getServiceAccountsLinkedToEmail(event, linkedEmailId = undefined)
   }
 }
 
-async function getServiceAccountsById(event, serviceId) {
+async function getServiceAccountsById(event, id, id_type) {
   try {
-    const statement = db.prepare('SELECT * FROM service_accounts WHERE service_id = ?');
-    const data = statement.all(serviceId);
+    let statement;
+    switch(id_type) {
+      case 'email':
+        statement = db.prepare('SELECT * FROM service_accounts WHERE email_id = ?');
+        break;
+      case 'service':
+        statement = db.prepare('SELECT * FROM service_accounts WHERE service_id = ?');
+        break;
+      case 'account':
+        statement = db.prepare('SELECT * FROM service_accounts WHERE id = ?');
+        break;
+      default:
+        throw new Error('Invalid id_type provided');
+    }
+
+    const data = statement.all(id);
     const mapped = data.map(mapPasswordData);
     return mapped;
   }
@@ -129,13 +143,27 @@ async function getServiceAccount(event, serviceId, username, emailId, subaddress
   }
 }
 
-async function getAllServices(event) {
+async function getAllServices(event, id = undefined) {
   try {
+    if (typeof id === 'number') {
+      const statement = db.prepare(`
+        SELECT services.*, IFNULL(s.count, 0) FROM services
+        LEFT JOIN (
+          SELECT service_id, COUNT(*) AS count
+          FROM service_accounts
+          GROUP BY service_id
+        ) AS s ON s.service_id = services.id
+        WHERE id = ?
+      `)
+      const data = statement.get(id);
+      return data;
+    }
+
     const statement = db.prepare(`
       SELECT services.*, IFNULL(s.count, 0) AS count FROM services
       LEFT JOIN (
         SELECT service_id, COUNT(*) AS count
-          FROM service_accounts
+        FROM service_accounts
         GROUP BY service_id
       ) AS s ON s.service_id = services.id
       ORDER BY services.service_name COLLATE NOCASE
@@ -164,22 +192,31 @@ async function getAllServices(event) {
 }
 
 async function createService(event, serviceName, domain, description) {
+  const statement = db.prepare(`
+    INSERT INTO services (service_name, domain_name, description_text, favicon_png)
+    VALUES (?, ?, ?, ?)
+  `);
+
   try {
-    const fetchUrl = `https://www.google.com/s2/favicons?domain=${domain}`;
+    const fetchUrl = faviconUrl(domain);
     const iconResponse = await fetch(fetchUrl);
     const arrayBuffer = iconResponse.ok ? await iconResponse.arrayBuffer() : null;
     const buffer = arrayBuffer ? Buffer.from(arrayBuffer) : null;
 
-    const statement = db.prepare(`
-      INSERT INTO services (service_name, domain_name, description_text, favicon_png)
-      VALUES (?, ?, ?, ?)
-    `);
     const info = statement.run(serviceName, domain, description, buffer);
     return info;
   }
   catch (err) {
     console.log(err);
-    return null;
+
+    try {
+      const info = statement.run(serviceName, domain, description, null);
+      return info;
+    }
+    catch(err) {
+      console.log(err);
+      return null;
+    }
   }
 }
 
@@ -216,6 +253,19 @@ async function deleteEmailAccount(event, emailId) {
   try {
     const statement = db.prepare('DELETE FROM email_accounts WHERE id = ?');
     const info = statement.run(emailId);
+
+    return info;
+  }
+  catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+
+async function deleteServiceAccount(event, serviceId) {
+  try {
+    const statement = db.prepare('DELETE FROM service_accounts WHERE id = ?');
+    const info = statement.run(serviceId);
 
     return info;
   }
@@ -312,6 +362,31 @@ async function formattingEmail(event, emailId, subaddress) {
   }
 }
 
+async function retryFetchFavicon(event, serviceId, domain) {
+  try {
+    const fetchUrl = faviconUrl(domain);
+    const iconResponse = await fetch(fetchUrl);
+    const arrayBuffer = iconResponse.ok ? await iconResponse.arrayBuffer() : null;
+    const buffer = arrayBuffer ? Buffer.from(arrayBuffer) : null;
+
+    if (!buffer) {
+      throw new Error('Failed to fetch favicon');
+    }
+    const statement = db.prepare(`
+      UPDATE services
+      SET favicon_png = ?
+      WHERE id = ?
+    `);
+    statement.run(buffer, serviceId);
+
+    return buffer;
+  }
+  catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+
 async function getBackupData(event) {
   // TODO:
 }
@@ -329,11 +404,13 @@ module.exports = {
   getOAuthProviders,
   editEmailAccount,
   deleteEmailAccount,
+  deleteServiceAccount,
   deleteAllData,
   getSystemPassword,
   verifyPassword,
   requestDecryptedPassword,
   getBackupData,
   storePassword,
+  retryFetchFavicon,
   formattingEmail,
 }

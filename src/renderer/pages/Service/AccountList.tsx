@@ -4,6 +4,7 @@ import BackButton from '@/components/BackButton';
 import { setError } from '@/components/ErrorHandler';
 import ServiceAccountCard from '@/components/ServiceAccountCard';
 import { Settings } from 'lucide-preact';
+import { refreshTrigger } from '@/utils/triggers';
 
 import './AccountList.scss';
 
@@ -18,10 +19,9 @@ function AccountList() {
 
   const id = Number(route.params['id']);
 
-  useEffect(() => {
+  const updateList = useCallback(() => {
     (async () => {
-      // console.log(id, route.params);
-      const services = await window.db.getAllServices();
+      const services = await window.db.getAllServices() as Array<ServiceProp>;
 
       if (services === null) {
         location.route(DASHBOARD_URL);
@@ -30,14 +30,13 @@ function AccountList() {
 
       const service = services.filter(s => s.id === id);
       if (service.length === 0) {
-        setError('Service not found');
         location.route(DASHBOARD_URL);
         return;
       }
       setServiceName(service[0].service_name);
       setDescription(service[0].description_text);
 
-      const accounts = await window.db.getServiceAccountsById(id);
+      const accounts = await window.db.getServiceAccountsById(id, 'service');
 
       if (accounts === null || accounts.length === 0) {
         setError('Something went wrong');
@@ -47,6 +46,16 @@ function AccountList() {
       setAccounts(accounts);
     })();
   }, [id]);
+
+  useEffect(() => {
+    updateList();
+
+    return () => {
+      setAccounts([]);
+      setServiceName('');
+      setDescription('');
+    }
+  }, [refreshTrigger.value]);
 
   const navigateToDashboard = useCallback(() => {
     location.route(DASHBOARD_URL);
@@ -60,7 +69,7 @@ function AccountList() {
           Accounts for <i className="highlight">{serviceName}</i>
         </h1>
         <div className="edit-btn-container">
-          <button className="edit-btn" onClick={navigateToDashboard}>
+          <button className="edit-btn" onClick={() => {}}>
             <Settings className="icon" />
           </button>
         </div>

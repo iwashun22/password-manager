@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
 import { Eye, EyeClosed, Copy, SquarePen, Trash, X, Check } from 'lucide-preact';
 import Confirmation from './Confirmation';
-import Toast from './Toast';
 import { triggerUpdate } from '@/utils/triggers';
 import { logoutSignal } from './InactivityHandler';
 import FormInputText from './FormInput/Text';
@@ -29,7 +28,7 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
         setError('Failed to copy password to clipboard');
       }
     })();
-  }, []);
+  }, [encrypted_password]);
 
   const showPassword = useCallback(() => {
     (async () => {
@@ -44,7 +43,7 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
         return;
       }
     })();
-  }, []);
+  }, [encrypted_password]);
 
   const openConfirmation = useCallback(() => {
     setShowConfirmation(true);
@@ -86,7 +85,6 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
         return;
       }
 
-      // console.log(info);
       triggerUpdate();
     })();
   }, []);

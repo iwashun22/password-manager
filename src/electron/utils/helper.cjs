@@ -35,16 +35,24 @@ function getOrCreateKey(forceCreate = false) {
 }
 
 function mapPasswordData(data) {
-  const decrypted = defaultDecrypt(data['encrypted_password']);
+  const columnName = 'encrypted_password';
+  const decrypted = data[columnName] !== '' ?
+    defaultDecrypt(data[columnName]) : '';
+
   return {
     ...data,
     password_length: decrypted.length
   }
 }
 
+function faviconUrl(domain) {
+  return `https://www.google.com/s2/favicons?domain=${domain}`;
+}
+
 module.exports = {
   hashPassword,
   comparePassword,
   getOrCreateKey,
-  mapPasswordData
+  mapPasswordData,
+  faviconUrl,
 }

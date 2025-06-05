@@ -47,7 +47,7 @@ function CreateForm() {
 
   useEffect(() => {
     (async () => {
-      const servicesData = await window.db.getAllServices();
+      const servicesData = await window.db.getAllServices(undefined);
       if (servicesData === null) {
         setError('something went wrong');
       }
@@ -159,9 +159,12 @@ function CreateForm() {
 }
 
 const DEFAULT_OAUTH_PROVIDERS = ['APPLE', 'GITHUB', 'GOOGLE'];
-export function AccountForm({ backButtonOnClick }: {
-  backButtonOnClick: () => void
-}) {
+interface AccountFormProps {
+  backButtonOnClick: () => void,
+}
+function AccountForm({ 
+  backButtonOnClick,
+}: AccountFormProps) {
   const location = useLocation();
   const [emailAccounts, setEmailAccounts] = useState<Array<EmailProp>>([]);
   const [providers, setProviders] = useState(DEFAULT_OAUTH_PROVIDERS);
@@ -266,7 +269,6 @@ export function AccountForm({ backButtonOnClick }: {
     }
     else {
       // Handle Account with Password
-
       if (emailAcc !== undefined) {
         const emailExist = await window.db.getEmailAccount(emailAcc.email);
         if (emailExist === undefined) {
@@ -355,7 +357,7 @@ export function AccountForm({ backButtonOnClick }: {
             <Switch
               state={checkOAuth}
               setState={setCheckOAuth}
-              >
+            >
               <i style={{ textTransform: 'capitalize' }}>
                 OAuth
               </i>

@@ -36,7 +36,7 @@ export function LabelText({
   labelFor
 }: {
   text: string,
-  labelFor: RefObject<HTMLInputElement>
+  labelFor: RefObject<HTMLInputElement | HTMLTextAreaElement>
 }) {
   const focus = useCallback(() => {
     labelFor.current?.focus();

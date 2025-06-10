@@ -15,6 +15,8 @@ const {
   getServiceAccountsById,
   getOAuthProviders,
   editEmailAccount,
+  editService,
+  editServiceAccount,
   deleteEmailAccount,
   deleteServiceAccount,
   getSystemPassword,
@@ -30,6 +32,7 @@ const { getOrCreateKey } = require('./utils/helper.cjs');
 
 const isDev = !app.isPackaged;
 
+// /var/folders/b3/92wvs4691x54ssmhf3p6nz400000gn/T/
 ipcMain.handle('db:create-email-acc', createEmailAccount);
 ipcMain.handle('db:create-service-acc', createServiceAccount);
 ipcMain.handle('db:create-service', createService);
@@ -41,6 +44,8 @@ ipcMain.handle('db:get-service-account', getServiceAccount);
 ipcMain.handle('db:get-service-accs-by-id', getServiceAccountsById);
 ipcMain.handle('db:get-oauth-providers', getOAuthProviders);
 ipcMain.handle('db:edit-email-acc', editEmailAccount);
+ipcMain.handle('db:edit-service', editService);
+ipcMain.handle('db:edit-service-acc', editServiceAccount);
 ipcMain.handle('db:delete-email-acc', deleteEmailAccount);
 ipcMain.handle('db:delete-service-acc', deleteServiceAccount);
 ipcMain.handle('db:delete-all-data', deleteAllData);
@@ -102,11 +107,6 @@ app.whenReady().then(() => {
   }
 
   createWindow();
-
-  // On macOS: After closing the window, the app is still running, so this event still triggers.
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  })
 });
 
 app.on('before-quit', () => {
@@ -118,6 +118,10 @@ app.on('before-quit', () => {
     console.error('Failed to encrypt DB before quitting:', err);
   }
 });
+
+process.on('SIGTERM', cleanupTemp);
+process.on('SIGINT', cleanupTemp);
+process.on('exit', cleanupTemp);
 
 app.on('window-all-closed', () => {
   app.quit();

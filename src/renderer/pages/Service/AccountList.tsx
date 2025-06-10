@@ -3,13 +3,17 @@ import { useCallback, useEffect, useState } from 'preact/hooks';
 import BackButton from '@/components/BackButton';
 import { setError } from '@/components/ErrorHandler';
 import ServiceAccountCard from '@/components/ServiceAccountCard';
-import { Settings } from 'lucide-preact';
+import { UserPlus, Settings } from 'lucide-preact';
 import { refreshTrigger } from '@/utils/triggers';
 import { modifyAccountSignal } from '@/utils/triggers';
+import { choseServiceId, AccountForm } from './CreateForm';
+import { signal } from '@preact/signals';
 
 import './AccountList.scss';
 
 const DASHBOARD_URL = '/services/dashboard';
+
+const openFormSignal = signal(false);
 
 function AccountList() {
   const route = useRoute();
@@ -62,10 +66,39 @@ function AccountList() {
     location.route(DASHBOARD_URL);
   }, []);
 
+  const openForm = useCallback(() => {
+    choseServiceId.value = id;
+    openFormSignal.value = true;
+  }, [id]);
+  
+  const closeForm = useCallback(() => {
+    choseServiceId.value = -1;
+    openFormSignal.value = false;
+  }, []);
+
+  const navigateBackAfterSubmit = useCallback(() => {
+    closeForm();
+    const path = `/services/${id}`;
+    location.route(path);
+  }, [id]);
+
+  const navigateToServiceInfo = useCallback(() => {
+    const path = `/services/edit/service/${id}`;
+    location.route(path);
+  }, [id]);
+
   if (modifyAccountSignal.value !== -1) {
-    const path = `/services/edit/${modifyAccountSignal.value}`;
+    const path = `/services/edit/account/${modifyAccountSignal.value}`;
     location.route(path);
   }
+
+  if (openFormSignal.value) return (
+    <AccountForm
+      backButtonOnClick={closeForm}
+      formBackButtonOnClick={closeForm}
+      afterSubmit={navigateBackAfterSubmit}
+    />
+  )
 
   return (
     <>
@@ -74,15 +107,18 @@ function AccountList() {
         <h1 className="title">
           Accounts for <i className="highlight">{serviceName}</i>
         </h1>
-        <div className="edit-btn-container">
-          <button className="edit-btn" onClick={() => {}}>
-            <Settings className="icon" />
-          </button>
-        </div>
         {
           description &&
           <p className="description">{ description }</p>
         }
+        <div className="edit-btn-container">
+          <button className="btn" onClick={openForm}>
+            <UserPlus className="icon" />
+          </button>
+          <button className="btn" onClick={navigateToServiceInfo}>
+            <Settings className="icon" />
+          </button>
+        </div>
       </header>
       <main className="main-container">
         {

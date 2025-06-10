@@ -15,7 +15,9 @@ declare global {
       getServiceAccount: (serviceId: number, username: string, emailId: number | null, subaddress: string | null, oauthProvider: string) => Promise<ServiceAccountProp | undefined | null>;
       getServiceAccountsById: (id: number, id_type: 'service' | 'account') => Promise<Array<ServiceAccountProp> | null>;
       getOAuthProviders: () => Promise<Array<string>>;
-      editEmailAccount: (emailId: number, newPassword: string) => Promise<Object | null>;
+      editEmailAccount: (emailId: number, newPassword: string) => Promise<Info | null>;
+      editService: (serviceId: number, serviceName: string, domainName: string, description: string) => Promise<Info | null>;
+      editServiceAccount: (accountId: number, serviceId: number, username: string, emailId: number | null, subaddress: string | null, password: string) => Promise<Info | ServiceAccountProp | null>;
       deleteEmailAccount: (emailId: number) => Promise<Info | null>;
       deleteServiceAccount: (serviceId: number) => Promise<Info | null>;
       deleteAllData: () => Promise<void>;

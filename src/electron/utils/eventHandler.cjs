@@ -249,6 +249,52 @@ async function editEmailAccount(event, emailId, newPassword) {
   }
 }
 
+async function editService(event, serviceId, serviceName, domainName, description) {
+  try {
+    const statement = db.prepare(`
+      UPDATE services
+      SET service_name = ?, domain_name = ?, description_text = ?
+      WHERE id = ?
+    `);
+    const info = statement.run(serviceName, domainName, description, serviceId);
+
+    await retryFetchFavicon(undefined, serviceId, domainName, true);
+    return info;
+  }
+  catch(err) {
+    console.log(err);
+    return null;
+  }
+}
+
+async function editServiceAccount(event, accountId, serviceId, username, emailId, subaddress, password) {
+  try {
+    const serviceAccountEmailExist = await getServiceAccount(null, serviceId, '', emailId, subaddress, null);
+    const serviceAccountUsernameExist = await getServiceAccount(null, serviceId, username, null, null, null);
+
+    for (
+      const acc of [serviceAccountEmailExist, serviceAccountUsernameExist]
+    )
+    {
+      if (acc && acc.id !== accountId) return acc;
+    }
+
+    const statement = db.prepare(`
+      UPDATE service_accounts
+      SET username = ?, email_id = ?, subaddress = ?, encrypted_password = ?
+      WHERE id = ?
+    `);
+    const encrypted = defaultEncrypt(password);
+
+    const info = statement.run(username, emailId, subaddress || '', encrypted, accountId);
+    return info;
+  }
+  catch(err) {
+    console.log(err);
+    return null;
+  }
+}
+
 async function deleteEmailAccount(event, emailId) {
   try {
     const statement = db.prepare('DELETE FROM email_accounts WHERE id = ?');
@@ -362,7 +408,13 @@ async function formattingEmail(event, emailId, subaddress) {
   }
 }
 
-async function retryFetchFavicon(event, serviceId, domain) {
+async function retryFetchFavicon(event, serviceId, domain, override = false) {
+  const statement = db.prepare(`
+    UPDATE services
+    SET favicon_png = ?
+    WHERE id = ?
+  `);
+
   try {
     const fetchUrl = faviconUrl(domain);
     const iconResponse = await fetch(fetchUrl);
@@ -372,17 +424,16 @@ async function retryFetchFavicon(event, serviceId, domain) {
     if (!buffer) {
       throw new Error('Failed to fetch favicon');
     }
-    const statement = db.prepare(`
-      UPDATE services
-      SET favicon_png = ?
-      WHERE id = ?
-    `);
+
     statement.run(buffer, serviceId);
 
     return buffer;
   }
   catch (err) {
     console.log(err);
+    if (override) {
+      statement.run(null, serviceId);
+    }
     return null;
   }
 }
@@ -403,6 +454,8 @@ module.exports = {
   getServiceAccountsById,
   getOAuthProviders,
   editEmailAccount,
+  editService,
+  editServiceAccount,
   deleteEmailAccount,
   deleteServiceAccount,
   deleteAllData,

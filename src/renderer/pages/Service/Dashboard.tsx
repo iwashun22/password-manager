@@ -4,7 +4,7 @@ import { FormEvent } from 'preact/compat';
 import BackButton from '@/components/BackButton';
 import SearchBar from '@/components/SearchBar';
 import ServiceCard from '@/components/ServiceCard';
-import { refreshTrigger, triggerUpdate } from '@/utils/triggers';
+import { refreshTrigger } from '@/utils/triggers';
 import { setError } from '@/components/ErrorHandler';
 
 import './Dashboard.scss';
@@ -25,7 +25,7 @@ function ServicesDashboard() {
 
   const updateList = useCallback(() => {
     (async () => {
-      const data = await window.db.getAllServices();
+      const data = await window.db.getAllServices() as ServiceProp[];
 
       if (data === null) {
         setServiceList([]);
@@ -71,8 +71,6 @@ function ServicesDashboard() {
             ))
         }
       </div>
-      { /** Temporary */ }
-      <button onClick={triggerUpdate}>reload</button>
     </>
   )
 }

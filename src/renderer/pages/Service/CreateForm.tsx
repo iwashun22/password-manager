@@ -159,11 +159,21 @@ function CreateForm() {
 }
 
 const DEFAULT_OAUTH_PROVIDERS = ['APPLE', 'GITHUB', 'GOOGLE'];
+
+const throwErr = (message: string) => {
+  setError(message);
+  throw new Error(message);
+}
+
 interface AccountFormProps {
   backButtonOnClick: () => void,
+  formBackButtonOnClick?: () => void,
+  afterSubmit?: () => void,
 }
-function AccountForm({ 
+export function AccountForm({ 
   backButtonOnClick,
+  formBackButtonOnClick = undefined,
+  afterSubmit = undefined
 }: AccountFormProps) {
   const location = useLocation();
   const [emailAccounts, setEmailAccounts] = useState<Array<EmailProp>>([]);
@@ -187,9 +197,11 @@ function AccountForm({
     })();
   }, []);
 
-  const formBack = useCallback(() => {
-    readyToAddAccount.value = false;
-  }, []);
+  const formBack = formBackButtonOnClick ? 
+    formBackButtonOnClick :
+    useCallback(() => {
+      readyToAddAccount.value = false;
+    }, []);
 
   const handleSubmit = useCallback((e: FormEvent) => {
     e.preventDefault();
@@ -202,18 +214,15 @@ function AccountForm({
     const [val_user, val_email, val_password, val_oauth] = [usernameRef, emailRef, passwordRef, oAuthRef].map(ref => ref.current!.value);
 
     if ((!val_user && !val_email) || (!val_email && checkOAuth)) {
-      setError('No account was provided');
-      return;
+      throwErr('No account was provided');
     }
     else if (!val_password && !checkOAuth) {
-      setError('No password was provided');
-      return;
+      throwErr('No password was provided');
     }
 
     const emailAcc = matchEmailPattern(val_email);
     if (emailAcc === undefined && val_email.length > 0) {
-      setError('Invalid email format');
-      return;
+      throwErr('Invalid email format');
     }
 
     // New service
@@ -225,7 +234,7 @@ function AccountForm({
       );
 
       if (!info) {
-        setError('Something went wrong');
+        throwErr('Something went wrong');
         return;
       }
 
@@ -236,60 +245,52 @@ function AccountForm({
     if (checkOAuth) {
       // Handle OAuth
       if (!val_oauth) {
-        setError('No OAuth provider was specified');
-        return;
+        throwErr('No OAuth provider was specified');
       }
 
       const emailExist = await window.db.getEmailAccount(emailAcc!.email);
       if (emailExist === undefined) {
-        setError('This email does not exist');
-        return;
+        throwErr('This email does not exist');
       }
       else if (emailAcc!.subaddress) {
-        setError('Subaddressing is not allowed');
-        return;
+        throwErr('Subaddressing is not allowed');
       }
 
       const oauthProvider = providers.filter(
         p => p.toLowerCase() === val_oauth.toLowerCase()
       )[0] || val_oauth;
 
-      const serviceAccountExist = await window.db.getServiceAccount(choseServiceId.value, '', emailExist.id, '', oauthProvider);
+      const serviceAccountExist = await window.db.getServiceAccount(choseServiceId.value, '', emailExist!.id, '', oauthProvider);
 
       if (serviceAccountExist === null) {
-        setError('Something went wrong');
-        return;
+        throwErr('Something went wrong');
       }
       if (serviceAccountExist !== undefined) {
-        setError('This account is already registered');
-        return;
+        throwErr('This account is already registered');
       }
 
-      info = await window.db.createServiceAccount(choseServiceId.value, emailExist.id, null, '', '', oauthProvider);
+      info = await window.db.createServiceAccount(choseServiceId.value, emailExist!.id, null, '', '', oauthProvider);
     }
     else {
       // Handle Account with Password
       if (emailAcc !== undefined) {
         const emailExist = await window.db.getEmailAccount(emailAcc.email);
         if (emailExist === undefined) {
-          setError("This email does not exist");
-          return;
+          throwErr("This email does not exist");
         }
 
-        const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, '', emailExist.id, emailAcc.subaddress, '');
+        const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, '', emailExist!.id, emailAcc.subaddress, '');
 
         if (serviceAccountAlreadyCreated === null) {
-          setError('Something went wrong');
-          return;
+          throwErr('Something went wrong');
         }
         if (serviceAccountAlreadyCreated !== undefined) {
-          setError('This email is already registered');
-          return;
+          throwErr('This email is already registered');
         }
 
         info = await window.db.createServiceAccount(
           choseServiceId.value,
-          emailExist.id,
+          emailExist!.id,
           emailAcc.subaddress,
           val_user,
           val_password,
@@ -300,13 +301,11 @@ function AccountForm({
         const serviceAccountAlreadyCreated = await window.db.getServiceAccount(choseServiceId.value, val_user, null, null, '');
 
         if (serviceAccountAlreadyCreated === null) {
-          setError('Something went wrong');
-          return;
+          throwErr('Something went wrong');
         }
 
         if (serviceAccountAlreadyCreated !== undefined) {
-          setError('This username is already registered');
-          return;
+          throwErr('This username is already registered');
         }
 
         info = await window.db.createServiceAccount(choseServiceId.value, null, null, val_user, val_password, null);
@@ -314,7 +313,7 @@ function AccountForm({
     }
 
     if (info === null) {
-      setError('Failed to add the account');
+      throwErr('Failed to add the account');
     }
     else {
       triggerUpdate();
@@ -322,7 +321,9 @@ function AccountForm({
       location.route('/services/dashboard');
     }
 
-    })();
+    })()
+      .then(afterSubmit)
+      .catch(err => console.warn(err));
   }, [checkOAuth]);
 
   useEffect(() => {

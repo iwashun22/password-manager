@@ -29,6 +29,10 @@ contextBridge.exposeInMainWorld('db', {
     ipcRenderer.invoke('db:get-oauth-providers'),
   editEmailAccount: (emailId, newPassword) =>
     ipcRenderer.invoke('db:edit-email-acc', emailId, newPassword),
+  editService: (serviceId, ...args) =>
+    ipcRenderer.invoke('db:edit-service', serviceId, ...args),
+  editServiceAccount: (accountId, ...args) =>
+    ipcRenderer.invoke('db:edit-service-acc', accountId, ...args),
   deleteEmailAccount: (emailId) =>
     ipcRenderer.invoke('db:delete-email-acc', emailId),
   deleteServiceAccount: (serviceId) =>

@@ -1,0 +1,57 @@
+@use '../styles/fonts' as *;
+@use '../styles/mixins' as *;
+
+.settings-container {
+  @include scroll-container();
+  display: inline-block;
+  margin: auto;
+  // overflow: visible;
+  width: 75vw;
+  max-width: 800px;
+
+  .setting-block {
+    margin-bottom: 20px;
+
+    .setting-title {
+      @include fw-medium();
+      text-align: start;
+      margin-bottom: 4px;
+      font-size: 18px;
+    }
+    .paragraph {
+      @include fw-light();
+      text-align: start;
+      margin-bottom: 8px;
+      font-size: 16px;
+      line-height: 20px;
+    }
+  }
+
+  .btn {
+    $buttonTextColor: #F9F6EE;
+    $buttonColor: #80669d;
+    $buttonDangerColor: #BD3039;
+
+    display: block;
+    text-transform: uppercase;
+    // border: 2px $white solid;
+    background-color: $buttonColor;
+    color: $buttonTextColor;
+    margin-bottom: 10px;
+
+    &:hover {
+      // color: black;
+      // background-color: $white;
+    }
+
+    &.delete {
+      background-color: transparent;
+      background-color: $buttonDangerColor;
+
+      &:hover {
+        // background-color: $color;
+        // color: #eee;
+      }
+    }
+  }
+}

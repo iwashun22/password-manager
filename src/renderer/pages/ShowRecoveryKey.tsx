@@ -19,6 +19,7 @@ function ShowRecoveryKey() {
   const location = useLocation();
   const key = recoveryKeySignal.value;
   // 5xBCD7u9hf/b8xZT
+  const scrollContainer = useRef<HTMLDivElement>(null);
   const keySpanRef = useRef<HTMLSpanElement>(null);
 
   const [showToast, setShowToast] = useState(false);
@@ -65,15 +66,17 @@ function ShowRecoveryKey() {
 
   useEffect(() => {
     // scroll to bottom
-    const rootContainer = document.getElementById('root-container')!;
-    rootContainer.scrollTo({
-      top: rootContainer.scrollHeight,
+    const container = scrollContainer.current
+    if (!container) return;
+
+    container.scrollTo({
+      top: container.scrollHeight,
       behavior: 'smooth',
     });
   }, [allowRedirect.value]);
 
   return (
-    <div>
+    <div className="container" ref={scrollContainer}>
       {
         showToast &&
         <Toast
@@ -99,20 +102,22 @@ function ShowRecoveryKey() {
         </p>
         <div className="recovery-container">
           <span className="recovery-key" ref={keySpanRef}>{key}</span>
-          <button
-            className="save-btn"
-            data-label="copy"
-            onClick={copyToClipboard}
-          >
-            <Copy display="block"/>
-          </button>
-          <button
-            className="save-btn"
-            data-label="save"
-            onClick={downloadFile}
-          >
-            <Download display="block"/>
-          </button>
+          <div className="button-container">
+            <button
+              className="save-btn"
+              data-label="copy"
+              onClick={copyToClipboard}
+            >
+              <Copy className="icon"/>
+            </button>
+            <button
+              className="save-btn"
+              data-label="save"
+              onClick={downloadFile}
+            >
+              <Download className="icon"/>
+            </button>
+          </div>
         </div>
       </main>
       {

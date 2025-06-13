@@ -1,5 +1,5 @@
 const { db } = require('./initData.cjs');
-const { defaultEncrypt, defaultDecrypt, generateKey, separateIV } = require('./encryption.cjs');
+const { defaultEncrypt, defaultDecrypt, encrypt, decrypt, generateKey, separateIV } = require('./encryption.cjs');
 const { hashPassword, comparePassword, mapPasswordData, faviconUrl, passwordAttemptStamp, clearAllAttempts } = require('./helper.cjs');
 const { clipboard } = require('electron');
 const fs = require('node:fs');
@@ -344,8 +344,11 @@ async function storePassword(event, password) {
   try {
     const hashed = hashPassword(password);
     const token = generateKey();
-    const encryptedToken = defaultEncrypt(token);
-    const { IV, encrypted: recoverToken } = separateIV(encryptedToken, true);
+    const randomKey = Buffer.from(generateKey(), 'base64');
+    const encryptedToken = encrypt(token, randomKey);
+    const { IV, encrypted: recoverToken } = separateIV(encryptedToken, false);
+    const recoveryKey = Buffer.concat([IV, randomKey]).toString('base64');
+
     const statement = db.prepare("INSERT INTO keys (used_in, key_string) VALUES (@keyName, @data)");
 
     const now = Date.now();
@@ -354,7 +357,7 @@ async function storePassword(event, password) {
     const data = [
       { keyName: SYSTEM_PASSWORD_KEY, data: hashed },
       { keyName: SYSTEM_TOKEN_KEY, data: token },
-      { keyName: SYSTEM_RECOVERY_KEY, data: recoverToken },
+      { keyName: SYSTEM_RECOVERY_KEY, data: recoverToken.toString('base64') },
       { keyName: SYSTEM_LOCKED, data: initialLockData },
     ];
     const insert = db.transaction((arr) => {
@@ -362,7 +365,7 @@ async function storePassword(event, password) {
     });
     
     insert(data);
-    return IV;
+    return recoveryKey;
   }
   catch (err) {
     console.log(err);

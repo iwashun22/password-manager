@@ -26,7 +26,7 @@ function WelcomePage() {
             showBtnCreate.value &&
             <BackButton onClick={backButtonOnClick}/>
           }
-          <CreateNew/>
+          <CreateNew afterCreated={backButtonOnClick}/>
         </>
       )
     case 'backup':

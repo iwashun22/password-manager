@@ -29,19 +29,25 @@
   background-color: black;
   padding: 14px 14px;
   width: 80vw;
-  height: 70px;
   max-width: 400px;
   min-width: 360px;
   margin: auto;
   border-radius: 15px;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
+  flex-direction: column;
 
   .recovery-key {
-    margin-right: auto;
     font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
+    overflow-wrap: anywhere;
+    text-align: left;
+    font-size: 18px;
+  }
+
+  .button-container {
+    margin-top: 10px;
   }
 
   .save-btn {
@@ -54,6 +60,13 @@
     display: inline-block;
     position: relative;
     transition: $transition;
+
+    .icon {
+      $icon-size: 20px;
+      display: block;
+      width: $icon-size;
+      height: $icon-size;
+    }
 
     &::before {
       content: attr(data-label);

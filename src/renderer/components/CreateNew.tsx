@@ -13,7 +13,10 @@ const MINIMUM_PASSWORD_LENGTH = 4;
 export const showBackButton = signal(true);
 export const recoveryKeySignal = signal('');
 
-function CreateNew() {
+interface Props {
+  afterCreated: () => void,
+}
+function CreateNew(props: Props) {
   const location = useLocation();
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmationRef = useRef<HTMLInputElement>(null);
@@ -34,6 +37,7 @@ function CreateNew() {
     }
 
     const recoveryKey = await window.user.storePassword(passwordValue);
+    console.log(recoveryKey);
 
     if (recoveryKey === null) {
       setError('Something went wrong');
@@ -41,6 +45,7 @@ function CreateNew() {
     }
 
     recoveryKeySignal.value = recoveryKey;
+    props.afterCreated();
     location.route('/recovery-key');
   }, []);
 
@@ -55,6 +60,7 @@ function CreateNew() {
           inputRef={passwordRef}
           errorText={passwordError}
           setErrorState={setPasswordError}
+          placeholder='password'
         />
         <PasswordInput
           inputRef={confirmationRef}

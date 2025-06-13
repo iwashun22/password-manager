@@ -8,6 +8,7 @@ import { logoutSignal } from '@/components/InactivityHandler';
 import PasswordInput from '@/components/PasswordInput';
 import CardButtonIcon from '@/components/CardButtonIcon';
 import { setError } from '@/components/ErrorHandler';
+import { triggerUpdate } from '@/utils/triggers';
 
 import './Settings.scss';
 
@@ -52,8 +53,12 @@ function Settings() {
   }, []);
 
   const deleteData = useCallback(() => {
-    // TODO:
-    // window.db.deleteAllData();
+    (async () => {
+      await window.db.deleteAllData();
+      triggerUpdate();
+      choseSettingSignal.value = 0;
+      location.route('/');
+    })();
   }, []);
 
   switch (choseSettingSignal.value) {
@@ -67,7 +72,7 @@ function Settings() {
           {
             choseSettingSignal.value === ChoseSetting.DELETE &&
             <Confirmation
-              onConfirm={() => {}}
+              onConfirm={deleteData}
               onCancel={() => { choseSettingSignal.value = 0; }}
               type='danger'
             >
@@ -160,6 +165,12 @@ function ChangePassword(props: SettingSubpageProp) {
       }
 
       const correctPassword = await window.user.verifyPassword(val_current_pw);
+
+      if (typeof correctPassword === 'number') {
+        logoutSignal.value = true;
+        return;
+      }
+
       if (!correctPassword) {
         setCurrentPasswordErr('incorrect password');
         return;
@@ -205,7 +216,7 @@ function ChangePassword(props: SettingSubpageProp) {
         />
         <CardButtonIcon
           type='submit'
-          text='okay'
+          text='save'
         />
       </form>
     </>

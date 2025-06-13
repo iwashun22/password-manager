@@ -4,6 +4,7 @@ import { signal } from '@preact/signals';
 import { useLocation } from 'preact-iso';
 import PasswordInput from './PasswordInput';
 import CardButtonIcon from './CardButtonIcon';
+import { setError } from './ErrorHandler';
 
 import './CreateNew.scss';
 
@@ -28,18 +29,19 @@ function CreateNew() {
       setPasswordError("must contain at least 4 characters");
       return;
     } else if (confirmationValue !== passwordValue) {
-      setConfirmationError("password confirmation does not match");
+      setConfirmationError("confirmation password does not match");
       return;
     }
 
-    try {
-      const recoveryKey = await window.user.storePassword(passwordValue);
-      recoveryKeySignal.value = recoveryKey;
-      location.route('/recovery-key');
+    const recoveryKey = await window.user.storePassword(passwordValue);
+
+    if (recoveryKey === null) {
+      setError('Something went wrong');
+      return;
     }
-    catch (err) {
-      console.error(err);
-    }
+
+    recoveryKeySignal.value = recoveryKey;
+    location.route('/recovery-key');
   }, []);
 
   return (

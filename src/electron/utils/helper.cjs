@@ -49,10 +49,46 @@ function faviconUrl(domain) {
   return `https://www.google.com/s2/favicons?domain=${domain}`;
 }
 
+const passwordAttempts = [];
+const REMEMBER_LAST_ATTEMP = 20 * 1000; // 20 seconds
+const MAX_ATTEMPTS = 5;
+
+function clearAllAttempts() {
+  if (passwordAttempts.length === 0) return;
+  passwordAttempts.shift();
+  clearAllAttempts();
+}
+
+function passwordAttemptStamp(fill = false) {
+  const recent = Date.now();
+
+  if (passwordAttempts.length === 0) {
+    passwordAttempts.push(recent);
+    return [...passwordAttempts];
+  }
+
+  if (fill) {
+    clearAllAttempts();
+    for(let i = 0; i < MAX_ATTEMPTS; i++) {
+      passwordAttempts.push(Date.now());
+    }
+  }
+
+  const lastAttemps = passwordAttempts[passwordAttempts.length - 1];
+  if ((lastAttemps + REMEMBER_LAST_ATTEMP) < recent) {
+    passwordAttempts.shift();
+  }
+  passwordAttempts.push(recent);
+
+  return [...passwordAttempts];
+}
+
 module.exports = {
   hashPassword,
   comparePassword,
   getOrCreateKey,
   mapPasswordData,
   faviconUrl,
+  passwordAttemptStamp,
+  clearAllAttempts,
 }

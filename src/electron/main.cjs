@@ -24,6 +24,7 @@ const {
   requestDecryptedPassword,
   getBackupData,
   storePassword,
+  updatePassword,
   deleteAllData,
   formattingEmail,
   retryFetchFavicon
@@ -52,6 +53,7 @@ ipcMain.handle('db:delete-all-data', deleteAllData);
 
 ipcMain.handle('user:get-system-pw', getSystemPassword);
 ipcMain.handle('user:store-password', storePassword);
+ipcMain.handle('user:update-password', updatePassword);
 ipcMain.handle('user:verify-password', verifyPassword);
 ipcMain.handle('user:request-decrypted-password', requestDecryptedPassword);
 ipcMain.handle('user:retry-fetch-favicon', retryFetchFavicon);

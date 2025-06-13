@@ -49,3 +49,24 @@ export function hasUnwantedCharacter(str: string) {
   const validChar = /^[a-zA-Z0-9_.+\-]+$/;
   return !validChar.test(str);
 }
+
+export function countDownTimeout(remainingSecond: number, callback: (second: number) => void, onCountDownEnd: () =>  void) {
+  if (remainingSecond === 0) {
+    onCountDownEnd();
+    return;
+  }
+
+  callback(remainingSecond);
+  setTimeout(() => {
+    countDownTimeout(remainingSecond - 1, callback, onCountDownEnd);
+  }, 1000);
+}
+
+export function formattingTime(second: number) {
+  if (second <= 60) {
+    return `${second} seconds`;
+  }
+
+  const minute = Math.floor(second / 60);
+  return `${minute} minutes`;
+}

@@ -1,9 +1,13 @@
 import { useLocation } from 'preact-iso';
-import { useCallback, useState } from 'preact/hooks';
+import { useCallback, useRef, useState } from 'preact/hooks';
+import { FormEvent } from 'preact/compat';
 import { signal } from '@preact/signals';
 import BackButton from '@/components/BackButton';
 import Confirmation from '@/components/Confirmation';
 import { logoutSignal } from '@/components/InactivityHandler';
+import PasswordInput from '@/components/PasswordInput';
+import CardButtonIcon from '@/components/CardButtonIcon';
+import { setError } from '@/components/ErrorHandler';
 
 import './Settings.scss';
 
@@ -48,6 +52,7 @@ function Settings() {
   }, []);
 
   const deleteData = useCallback(() => {
+    // TODO:
     // window.db.deleteAllData();
   }, []);
 
@@ -118,10 +123,91 @@ interface SettingSubpageProp {
   backButtonOnClick: () => void,
 }
 function ChangePassword(props: SettingSubpageProp) {
+  const currentPasswordRef = useRef<HTMLInputElement>(null);
+  const newPasswordRef = useRef<HTMLInputElement>(null);
+  const passwordConfirmRef = useRef<HTMLInputElement>(null);
+
+  const [currentPasswordErr, setCurrentPasswordErr] = useState('');
+  const [newPasswordErr, setNewPasswordErr] = useState('');
+  const [confirmationErr, setConfirmationErr] = useState('');
+
+  const handleSubmit = useCallback((e: FormEvent) => {
+    e.preventDefault();
+
+    (async () => {
+      const [val_current_pw, val_new_pw, val_confirm_pw] = ([currentPasswordRef, newPasswordRef, passwordConfirmRef]).map(ref => ref.current?.value || '');
+
+      if (!val_current_pw) {
+        setCurrentPasswordErr('missing current password');
+        return;
+      }
+      if (!val_new_pw) {
+        setNewPasswordErr('missing new password');
+        return;
+      }
+      else if (val_new_pw.length < 4) {
+        setNewPasswordErr('must contain at least 4 characters');
+        return;
+      }
+      else if (val_new_pw === val_current_pw) {
+        setNewPasswordErr('same as current password');
+        return;
+      }
+
+      if (val_new_pw !== val_confirm_pw) {
+        setConfirmationErr('confirmation password does not match');
+        return;
+      }
+
+      const correctPassword = await window.user.verifyPassword(val_current_pw);
+      if (!correctPassword) {
+        setCurrentPasswordErr('incorrect password');
+        return;
+      }
+
+      const info = await window.user.updatePassword(val_new_pw);
+
+      if (info === null) {
+        setError('Something went wrong');
+        return;
+      }
+
+      props.backButtonOnClick();
+    })();
+  }, []);
+
   return (
     <>
       <BackButton onClick={props.backButtonOnClick} />
-      <h1>password</h1>
+      <header className="page-header">
+        <h2>Set new password</h2>
+      </header>
+      <form onSubmit={handleSubmit} className="password-form">
+        <PasswordInput
+          inputRef={currentPasswordRef}
+          placeholder='current password'
+          errorText={currentPasswordErr}
+          setErrorState={setCurrentPasswordErr}
+          preventPasting
+        />
+        <PasswordInput
+          inputRef={newPasswordRef}
+          placeholder='new password'
+          errorText={newPasswordErr}
+          setErrorState={setNewPasswordErr}
+        />
+        <PasswordInput
+          inputRef={passwordConfirmRef}
+          placeholder='confirmation'
+          errorText={confirmationErr}
+          setErrorState={setConfirmationErr}
+          preventPasting
+        />
+        <CardButtonIcon
+          type='submit'
+          text='okay'
+        />
+      </form>
     </>
   );
 }

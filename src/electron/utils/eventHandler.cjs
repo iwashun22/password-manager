@@ -1,6 +1,6 @@
 const { db } = require('./initData.cjs');
 const { defaultEncrypt, defaultDecrypt, generateKey, separateIV } = require('./encryption.cjs');
-const { hashPassword, comparePassword, mapPasswordData, faviconUrl } = require('./helper.cjs');
+const { hashPassword, comparePassword, mapPasswordData, faviconUrl, passwordAttemptStamp, clearAllAttempts } = require('./helper.cjs');
 const { clipboard } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -8,6 +8,7 @@ const path = require('node:path');
 const SYSTEM_PASSWORD_KEY = 'system';
 const SYSTEM_TOKEN_KEY = 'token';
 const SYSTEM_RECOVERY_KEY = 'recover';
+const SYSTEM_LOCKED = 'locked';
 
 async function createEmailAccount(event, email, password) {
   try {
@@ -340,31 +341,120 @@ async function getSystemPassword(event) {
 }
 
 async function storePassword(event, password) {
-  const hashed = hashPassword(password);
-  const token = generateKey();
-  const encryptedToken = defaultEncrypt(token);
-  const { IV, encrypted: recoverToken } = separateIV(encryptedToken, true);
-  const statement = db.prepare("INSERT INTO keys (used_in, key_string) VALUES (@keyName, @data)");
+  try {
+    const hashed = hashPassword(password);
+    const token = generateKey();
+    const encryptedToken = defaultEncrypt(token);
+    const { IV, encrypted: recoverToken } = separateIV(encryptedToken, true);
+    const statement = db.prepare("INSERT INTO keys (used_in, key_string) VALUES (@keyName, @data)");
 
-  const data = [
-    { keyName: SYSTEM_PASSWORD_KEY, data: hashed },
-    { keyName: SYSTEM_TOKEN_KEY, data: token },
-    { keyName: SYSTEM_RECOVERY_KEY, data: recoverToken }
-  ];
-  const insert = db.transaction((arr) => {
-    for (const item of arr) statement.run(item);
-  });
+    const now = Date.now();
+    const initialLockData = defaultEncrypt(`0::${now}`);
 
-  insert(data);
-  return IV;
+    const data = [
+      { keyName: SYSTEM_PASSWORD_KEY, data: hashed },
+      { keyName: SYSTEM_TOKEN_KEY, data: token },
+      { keyName: SYSTEM_RECOVERY_KEY, data: recoverToken },
+      { keyName: SYSTEM_LOCKED, data: initialLockData },
+    ];
+    const insert = db.transaction((arr) => {
+      for (const item of arr) statement.run(item);
+    });
+    
+    insert(data);
+    return IV;
+  }
+  catch (err) {
+    console.log(err);
+    return null;
+  }
 }
 
+async function updatePassword(event, password) {
+  try {
+    const hashed = hashPassword(password);
+    const statement = db.prepare(`
+      UPDATE keys
+      SET key_string = ?
+      WHERE used_in = ?
+    `);
+    const info = statement.run(hashed, SYSTEM_PASSWORD_KEY);
+    return info;
+  }
+  catch (err) {
+    console.log(err);
+    return null;
+  }
+}
+
+
 async function verifyPassword(event, password) {
-  const statement = db.prepare('SELECT * FROM keys WHERE used_in == ?');
+  let currentTimeout = 0;
+
+  try {
+    const statement = db.prepare('SELECT * FROM keys WHERE used_in = ?');
+    const lockedData = statement.get(SYSTEM_LOCKED);
+
+    if (lockedData === undefined) {
+      const insert = db.prepare('INSERT INTO keys (used_in, key_string) VALUES (?, ?)');
+      insert.run(SYSTEM_LOCKED, '');
+      throw new Error('The column was deleted');
+    }
+    else {
+      const decrypted = defaultDecrypt(lockedData["key_string"]);
+      const format = decrypted.split("::");
+
+      currentTimeout = format[0] ? Number(format[0]) : 0;
+      const waitUntil = format[1] ? Number(format[1]) : 0;
+      const now = Date.now();
+
+      if (now < waitUntil) {
+        passwordAttemptStamp(true);
+        const secondGap = Math.ceil(Math.abs(waitUntil - now) / 1000);
+
+        if (secondGap > 1) return secondGap;
+      }
+    }
+  }
+  catch (err) {
+    const stmt = db.prepare(`
+      UPDATE keys SET key_string = ?
+      WHERE used_in = ?
+    `);
+    const WAITING_TIME = 30;
+    const enableWhen = Date.now() + (WAITING_TIME * 1000);
+    const encrypted = defaultEncrypt(`${WAITING_TIME}::${enableWhen}`);
+    stmt.run(encrypted, SYSTEM_LOCKED);
+
+    return WAITING_TIME;
+  }
+
+  const statement = db.prepare('SELECT * FROM keys WHERE used_in = ?');
   const data = statement.get(SYSTEM_PASSWORD_KEY);
   const hashedPassword = data["key_string"];
 
   const isMatched = comparePassword(password, hashedPassword);
+
+  const lockStatement = db.prepare(`
+    UPDATE keys SET key_string = ?
+    WHERE used_in = ?
+  `);
+
+  if (!isMatched) {
+    const attempts = passwordAttemptStamp();
+    if (attempts.length >= 5) {
+      currentTimeout += 30;
+      const waitUntilNext = Date.now() + (currentTimeout * 1000);
+      const encrypted = defaultEncrypt(`${currentTimeout}::${waitUntilNext}`);
+      lockStatement.run(encrypted, SYSTEM_LOCKED);
+      return currentTimeout;
+    }
+  }
+  else {
+    const encrypted = defaultEncrypt('0::0');
+    lockStatement.run(encrypted, SYSTEM_LOCKED);
+    clearAllAttempts();
+  }
   return isMatched;
 }
 
@@ -464,6 +554,7 @@ module.exports = {
   requestDecryptedPassword,
   getBackupData,
   storePassword,
+  updatePassword,
   retryFetchFavicon,
   formattingEmail,
 }

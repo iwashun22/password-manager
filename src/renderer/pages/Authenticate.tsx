@@ -4,6 +4,7 @@ import { FormEvent } from 'preact/compat';
 import { previousPath } from '../components/InactivityHandler';
 import PasswordInput from '@/components/PasswordInput';
 import CardButtonIcon from '@/components/CardButtonIcon';
+import { countDownTimeout, formattingTime } from '@/utils/helper';
 
 import './Authenticate.scss';
 
@@ -11,19 +12,41 @@ function Authenticate() {
   const location = useLocation();
   const passwordRef = useRef<HTMLInputElement>(null);
   const [errorText, setErrorText] = useState('');
+  const [disabled, setDisabled] = useState(false);
 
-  const handleSubmit = useCallback(async (e: FormEvent) => {
+  const handleSubmit = useCallback((e: FormEvent) => {
     e.preventDefault();
-    if (!passwordRef.current || !passwordRef.current.value) return;
+    if (disabled) return;
 
-    const isMatched = await window.user.verifyPassword(passwordRef.current.value);
-    if (isMatched) {
-      location.route(previousPath.value);
-    }
-    else {
-      setErrorText('Incorrect password');
-    }
-  }, [previousPath.value]);
+    (async () => {
+      if (!passwordRef.current || !passwordRef.current.value) return;
+
+      const isMatched = await window.user.verifyPassword(passwordRef.current.value);
+
+      if (typeof isMatched === 'number') {
+        setDisabled(true);
+        countDownTimeout(
+          isMatched,
+          (n) => {
+            const time = formattingTime(n);
+            setErrorText(`try again in ${time}`);
+          },
+          () => {
+            setDisabled(false);
+            setErrorText('');
+          }
+        )
+        return;
+      }
+
+      if (isMatched) {
+        location.route(previousPath.value);
+      }
+      else {
+        setErrorText('Incorrect password');
+      }
+    })();
+  }, [previousPath.value, disabled]);
 
   return (
     <div>
@@ -35,6 +58,7 @@ function Authenticate() {
           inputRef={passwordRef}
           errorText={errorText}
           setErrorState={setErrorText}
+          disabled={disabled}
           preventPasting
         />
         <CardButtonIcon type='submit' text='verify'/>

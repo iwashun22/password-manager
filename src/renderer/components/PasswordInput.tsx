@@ -10,6 +10,7 @@ interface Props {
   preventPasting?: boolean,
   errorText?: string,
   setErrorState?: Dispatch<StateUpdater<string>> | undefined
+  disabled?: boolean,
 }
 
 function PasswordInput({
@@ -17,7 +18,8 @@ function PasswordInput({
   placeholder = 'password',
   preventPasting = false,
   errorText = '',
-  setErrorState = undefined
+  setErrorState = undefined,
+  disabled = false,
 }: Props) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -57,6 +59,7 @@ function PasswordInput({
         onInput={removeErrorTextOnChange}
         onFocusOut={hideOnFocusOut}
         onPaste={ preventPasting ? (e) => e.preventDefault() : undefined }
+        disabled={disabled}
       />
       <button
         type="button"

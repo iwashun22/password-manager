@@ -5,12 +5,12 @@
   @include scroll-container();
   display: inline-block;
   margin: auto;
-  // overflow: visible;
   width: 75vw;
   max-width: 800px;
 
   .setting-block {
     margin-bottom: 20px;
+    padding-inline: 10px;
 
     .setting-title {
       @include fw-medium();
@@ -54,4 +54,11 @@
       }
     }
   }
+}
+
+.password-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }

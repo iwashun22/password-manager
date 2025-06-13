@@ -46,6 +46,8 @@ contextBridge.exposeInMainWorld('user', {
     ipcRenderer.invoke('user:get-system-pw'),
   storePassword: (password) =>
     ipcRenderer.invoke('user:store-password', password),
+  updatePassword: (password) =>
+    ipcRenderer.invoke('user:update-password', password),
   verifyPassword: (password) =>
     ipcRenderer.invoke('user:verify-password', password),
   requestDecryptedPassword: (encryptedPassword, request) =>

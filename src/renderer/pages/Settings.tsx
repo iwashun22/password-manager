@@ -43,7 +43,21 @@ function Settings() {
       choseSettingSignal.value = mode;
 
       if (mode === ChoseSetting.BACKUP) {
-        // TODO:
+        (async () => {
+          const data = await window.backup.getBackupData();
+          if (data === null) {
+            setError('Failed to retrieve backup');
+            return;
+          }
+
+          const a = document.createElement('a');
+          const blob = new Blob([data], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          a.href = url;
+          a.download = 'backup-file.txt';
+          a.click();
+          URL.revokeObjectURL(url);
+        })();
         return;
       }
       else if (mode === ChoseSetting.DELETE) {

@@ -532,7 +532,33 @@ async function retryFetchFavicon(event, serviceId, domain, override = false) {
 }
 
 async function getBackupData(event) {
-  // TODO:
+  try {
+    const servicesData = db.prepare('SELECT * FROM services').all();
+    const emailsData = db.prepare('SELECT * FROM email_accounts').all();
+    const accountsData = db.prepare('SELECT * FROM service_accounts').all();
+    const recoverToken = db.prepare('SELECT * FROM keys WHERE used_in = ?').get(SYSTEM_RECOVERY_KEY);
+    const encryptionKey = db.prepare('SELECT * FROM keys WHERE used_in = ?').get(SYSTEM_TOKEN_KEY);
+    const password = db.prepare('SELECT * FROM keys WHERE used_in = ?').get(SYSTEM_PASSWORD_KEY);
+
+    if (!password["key_string"]) {
+      throw new Error('no password found');
+    }
+
+    const format = {
+      "services": servicesData,
+      "emails": emailsData,
+      "accounts": accountsData,
+      "password": password["key_string"]
+    };
+    const json = JSON.stringify(format);
+    const keyBuffer = Buffer.from(encryptionKey["key_string"], 'base64');
+    const encrypted = encrypt(json, keyBuffer);
+    return recoverToken["key_string"] + '\n' + encrypted;
+  }
+  catch(err) {
+    console.log(err);
+    return null;
+  }
 }
 
 module.exports = {

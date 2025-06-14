@@ -32,6 +32,9 @@ declare global {
       retryFetchFavicon: (serviceId: number, domain: string) => Promise<Buffer | null>;
       saveDatabase: () => Promise<void>;
     };
+    backup: {
+      getBackupData: () => Promise<string | null>
+    }
   }
 
   interface Info {

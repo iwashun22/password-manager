@@ -60,7 +60,6 @@ ipcMain.handle('user:retry-fetch-favicon', retryFetchFavicon);
 ipcMain.handle('user:formatting-email', formattingEmail);
 ipcMain.handle('user:save-database', encryptDB);
 
-//TODO:
 ipcMain.handle('backup:get-backup-data', getBackupData);
 
 const createWindow = () => {

@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect } from 'preact/hooks';
+import { signal } from '@preact/signals';
 import { setMessage } from './SuccessLogHandler';
 import { setError } from './ErrorHandler';
 import { triggerUpdate } from '@/utils/triggers';
@@ -10,6 +11,8 @@ import { editAccountId } from '@/utils/triggers';
 import Confirmation from './Confirmation';
 
 import './ServiceAccountCard.scss';
+
+const showConfirmationSignal = signal(-1);
 
 function ServiceAccountCard({
   id,
@@ -25,7 +28,6 @@ function ServiceAccountCard({
   const [email, setEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
-  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const togglePasswordVisibility = useCallback(() => {
     (async () => {
@@ -104,14 +106,15 @@ function ServiceAccountCard({
         return;
       }
 
-      setShowConfirmation(false);
+      showConfirmationSignal.value = -1;
       triggerUpdate();
     })();
-  }, []);
+  }, [id]);
 
   const openConfirmation = useCallback(() => {
-    setShowConfirmation(true);
-  }, []);
+    logoutSignal.value = true;
+    showConfirmationSignal.value = id;
+  }, [id]);
 
   const navigateToEdit = useCallback(() => {
     editAccountId(id);
@@ -122,11 +125,11 @@ function ServiceAccountCard({
   return (
     <>
     {
-      showConfirmation &&
+      showConfirmationSignal.value === id &&
       <Confirmation
         type='danger'
         onConfirm={deleteAccount}
-        onCancel={() => setShowConfirmation(false)}
+        onCancel={() => { showConfirmationSignal.value = -1; }}
       >
         <h3>Are you sure you want to delete this account?</h3>
       </Confirmation>

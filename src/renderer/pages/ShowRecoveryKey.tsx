@@ -68,6 +68,7 @@ function ShowRecoveryKey() {
     // scroll to bottom
     const container = scrollContainer.current
     if (!container) return;
+    if (!allowRedirect.value) return;
 
     container.scrollTo({
       top: container.scrollHeight,
@@ -76,7 +77,7 @@ function ShowRecoveryKey() {
   }, [allowRedirect.value]);
 
   return (
-    <div className="container" ref={scrollContainer}>
+    <div className="scroll-container" ref={scrollContainer}>
       {
         showToast &&
         <Toast

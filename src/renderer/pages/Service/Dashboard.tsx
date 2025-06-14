@@ -9,6 +9,9 @@ import { setError } from '@/components/ErrorHandler';
 
 import './Dashboard.scss';
 
+const filterFn = (searchStr: string) => (sv: ServiceProp) =>
+  sv.service_name.toLowerCase().startsWith(searchStr.toLowerCase());
+
 function ServicesDashboard() {
   const location = useLocation();
   const searchRef = useRef<HTMLInputElement>(null);
@@ -62,13 +65,19 @@ function ServicesDashboard() {
       />
       <div className="container">
         {
-          serviceList
-            .filter(sv => sv.service_name.toLowerCase().startsWith(searchValue.toLowerCase()))
-            .map((sv, i) => (
-              <div className="spacing">
-                <ServiceCard key={i} {...sv} />
-              </div>
-            ))
+          serviceList.length === 0 ?
+            <h2 className="bg-text">No accounts for any services.</h2>
+          :
+            serviceList.filter(filterFn(searchValue)).length === 0 ?
+              <h2 className="bg-text">No services match the search query.</h2>
+            :
+            serviceList
+              .filter(filterFn(searchValue))
+              .map((sv, i) => (
+                <div className="spacing">
+                  <ServiceCard key={i} {...sv} />
+                </div>
+              ))
         }
       </div>
     </>

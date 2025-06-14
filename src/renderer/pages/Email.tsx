@@ -12,8 +12,6 @@ import EmailCard from '@/components/EmailCard';
 import { matchEmailPattern } from '@/utils/helper.ts';
 import { refreshTrigger, triggerUpdate } from '@/utils/triggers';
 
-import './Email.scss';
-
 const formOpenSignal = signal(false);
 const emailSearchSignal = signal('');
 const lastViewedServiceId = signal(-1);
@@ -100,7 +98,7 @@ function Email() {
       <div className="container">
       {
         emailData.length  === 0 ?
-         <h2 className="bg-text">No email data to display</h2>
+          <h2 className="bg-text">No email data to display</h2>
         :
           emailData.filter(filterSearchValue(searchValue)).length === 0 ?
             <h2 className="bg-text">No emails match the search query.</h2>
@@ -151,6 +149,11 @@ function EmailForm() {
 
       (async () => {
         try {
+          const emailExist = await window.db.getEmailAccount(emailAddress.email);
+          if (emailExist) {
+            setError('This email address already exists');
+            return;
+          }
           const info = await window.db.createEmailAccount(emailAddress.email, passwd.value);
           console.log(info);
           formOpenSignal.value = false;

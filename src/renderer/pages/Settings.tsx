@@ -197,6 +197,7 @@ function ChangePassword(props: SettingSubpageProp) {
         return;
       }
 
+      triggerUpdate();
       props.backButtonOnClick();
     })();
   }, []);

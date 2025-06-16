@@ -11,11 +11,11 @@ import { setError } from './ErrorHandler';
 import './EmailCard.scss';
 
 const authenticatedBeforeModify = signal(-1);
+const deleteEmailSignal = signal(-1);
 
 function EmailCard({ id, email, encrypted_password, password_length }: EmailProp) {
   const [decrypted, setDecrypted] = useState('');
   const [visible, setVisible] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const copyToClipboard = useCallback(() => {
     (async () => {
@@ -46,8 +46,9 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
   }, [encrypted_password]);
 
   const openConfirmation = useCallback(() => {
-    setShowConfirmation(true);
-  }, []);
+    deleteEmailSignal.value = id;
+    logoutSignal.value = true;
+  }, [id]);
 
   const authenticateBeforeEdit = useCallback(() => {
     const authenticatedIndex = authenticatedBeforeModify.value;
@@ -67,7 +68,6 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
     }
 
     (async () => {
-      setShowConfirmation(false);
       const servicesWithThisEmail = await window.db.getServiceAccountsLinkedToEmail(id);
 
       if (servicesWithThisEmail === null) {
@@ -85,9 +85,10 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
         return;
       }
 
+      deleteEmailSignal.value = -1;
       triggerUpdate();
     })();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     if (!visible) {
@@ -106,10 +107,10 @@ function EmailCard({ id, email, encrypted_password, password_length }: EmailProp
   return (
     <>
     {
-      showConfirmation &&
+      deleteEmailSignal.value === id  &&
       <Confirmation
         onConfirm={deleteEmail}
-        onCancel={() => setShowConfirmation(false)}
+        onCancel={() => { deleteEmailSignal.value = -1; }}
         type='danger'
       >
         <h3>Are you sure you want to delete this email?</h3>
@@ -177,7 +178,6 @@ function ModifyCard({ id, email, encrypted_password }: Omit<EmailProp, 'password
   }, []);
 
   const updatePassword = useCallback(() => {
-    // TODO:
     (async () => {
       if (!newPasswordRef.current) return;
 

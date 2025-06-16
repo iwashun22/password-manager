@@ -2,7 +2,8 @@ import { useCallback } from 'preact/hooks';
 import { signal } from '@preact/signals';
 import { DatabaseBackup, FilePlus2 } from 'lucide-preact';
 import CardButtonIcon from '../components/CardButtonIcon';
-import CreateNew, { showBackButton as showBtnCreate } from '../components/CreateNew';
+import CreateNew from '../components/CreateNew';
+import Backup from '../components/Backup';
 import BackButton from '@/components/BackButton';
 
 import './WelcomePage.scss';
@@ -22,19 +23,15 @@ function WelcomePage() {
     case 'create':
       return (
         <>
-          { 
-            showBtnCreate.value &&
-            <BackButton onClick={backButtonOnClick}/>
-          }
+          <BackButton onClick={backButtonOnClick}/>
           <CreateNew afterCreated={backButtonOnClick}/>
         </>
       )
     case 'backup':
-      // TODO:
       return (
         <>
           <BackButton onClick={backButtonOnClick}/>
-          <h2>Backup</h2>
+          <Backup afterLoaded={backButtonOnClick}/>
         </>
       )
   }

@@ -10,7 +10,6 @@ import './CreateNew.scss';
 
 const MINIMUM_PASSWORD_LENGTH = 4;
 
-export const showBackButton = signal(true);
 export const recoveryKeySignal = signal('');
 
 interface Props {

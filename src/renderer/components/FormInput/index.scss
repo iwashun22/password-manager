@@ -52,7 +52,7 @@ $input-color: #fffcc3;
 
     &::placeholder {
       @include fonts.fw-light();
-      text-transform: capitalize;
+      // text-transform: capitalize;
     }
 
     &[data-type-url=true], &[data-type-url]::placeholder {
@@ -129,7 +129,7 @@ $input-color: #fffcc3;
     text-align: start;
     border-radius: $input-border-radius;
     overflow: hidden;
-    
+
     .item {
       user-select: none;
       cursor: pointer;

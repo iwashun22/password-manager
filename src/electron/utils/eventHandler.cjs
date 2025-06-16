@@ -363,7 +363,7 @@ async function storePassword(event, password) {
     const insert = db.transaction((arr) => {
       for (const item of arr) statement.run(item);
     });
-    
+
     insert(data);
     return recoveryKey;
   }
@@ -544,20 +544,69 @@ async function getBackupData(event) {
       throw new Error('no password found');
     }
 
-    const format = {
-      "services": servicesData,
-      "emails": emailsData,
-      "accounts": accountsData,
-      "password": password["key_string"]
-    };
-    const json = JSON.stringify(format);
+    const emailMap = new Map(emailsData.map(v => [v.id, v.email]));
+    const mappedAccounts = accountsData.map(v => {
+      const email = emailMap.get(v.email_id) || '';
+      const password = v.encrypted_password ? defaultDecrypt(v.encrypted_password) : '';
+      delete v.encrypted_password;
+      return {
+        ...v,
+        "email": email,
+        "password": password
+      }
+    });
+
+    const serviceAccounts = servicesData.map(s => {
+      const accounts = mappedAccounts.filter(acc => acc.service_id === s.id);
+      return {
+        ...s,
+        "accounts": accounts
+      }
+    });
+
+    const formatted = {
+      "emails": emailsData.map(email => {
+        const password = email.encrypted_password ? defaultDecrypt(email.encrypted_password) : '';
+        delete email.encrypted_password;
+        return {
+          ...email,
+          "password": password
+        }
+      }),
+      "services": serviceAccounts,
+      "password": password["key_string"],
+    }
+    const jsonString = JSON.stringify(formatted);
     const keyBuffer = Buffer.from(encryptionKey["key_string"], 'base64');
-    const encrypted = encrypt(json, keyBuffer);
+    const encrypted = encrypt(jsonString, keyBuffer);
     return recoverToken["key_string"] + '\n' + encrypted;
   }
   catch(err) {
     console.log(err);
     return null;
+  }
+}
+
+async function loadBackupData(event, data, recoveryKey) {
+  try {
+    const [recoverToken, jsonString] = data.split('\n');
+    const recoverTokenBuffer = Buffer.from(recoverToken, "base64");
+    const { IV, encrypted: randomKey } = separateIV(recoveryKey);
+    const key = decrypt(Buffer.concat([IV, recoverTokenBuffer]), randomKey);
+    console.log(key);
+  }
+  catch (err) {
+
+  }
+  const emailMap = new Map();
+
+  for (const email of json["emails"]) {
+    try {
+
+    }
+    catch (err) {
+
+    }
   }
 }
 

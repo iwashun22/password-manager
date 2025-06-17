@@ -54,7 +54,8 @@
       font-size: 20px;
     }
     .filesize {
-      font-size: 18px;
+      font-size: 16px;
+      color: #967969;
     }
   }
 
@@ -68,10 +69,14 @@
       width: $size;
       height: $size;
       color: #CD5C5C;
+      fill: transparent;
+      transition: .2s;
     }
 
     &:hover .icon {
       color: #bd3434;
+      stroke: white;
+      fill: #CD5C5C;
     }
   }
 }

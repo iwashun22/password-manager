@@ -155,7 +155,12 @@ function EmailForm() {
             return;
           }
           const info = await window.db.createEmailAccount(emailAddress.email, passwd.value);
-          console.log(info);
+
+          if (info === null) {
+            setError('Something went wrong');
+            return;
+          }
+
           formOpenSignal.value = false;
           triggerUpdate();
         }

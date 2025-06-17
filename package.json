@@ -11,7 +11,7 @@
     "rebuild": "electron-rebuild",
     "start": "electron .",
     "preview": "vite preview",
-    "update-encryption": "node secureFile -e ./src/electron/utils/encryption.cjs"
+    "update-encryption": "node secureFile.cjs -e ./src/electron/utils/encryption.cjs"
   },
   "dependencies": {
     "@preact/signals": "^2.0.4",

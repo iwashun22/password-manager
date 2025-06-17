@@ -63,4 +63,10 @@ contextBridge.exposeInMainWorld('user', {
 contextBridge.exposeInMainWorld('backup', {
   getBackupData: () =>
     ipcRenderer.invoke('backup:get-backup-data'),
+  loadBackupData: (data, recoveryKey) =>
+    ipcRenderer.invoke('backup:load-backup-data', data, recoveryKey),
+  loadEachService: (json) =>
+    ipcRenderer.invoke('backup:load-each-service', json),
+  checkKeySize: (keyString) =>
+    ipcRenderer.invoke('backup:check-key-size', keyString)
 });

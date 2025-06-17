@@ -1,0 +1,46 @@
+$border-radius: 20px;
+$border-color: #D27D2D;
+
+.recovery-key-input-container {
+  width: 400px;
+  height: 70px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  position: relative;
+
+  textarea {
+    flex: 1;
+    resize: none;
+    padding: 8px;
+    font-size: 16px;
+    border-radius: $border-radius;
+    border: 3px $border-color solid;
+    background-color: #EADDCA;
+    color: #6E260E;
+
+    &::placeholder {
+      color: #C19A6B;
+    }
+  }
+
+  .choose-file-btn {
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    translate: -8px -8px;
+    padding: 4px 10px;
+    background-color: transparent;
+    border-radius: 10px;
+    font-size: 14px;
+    border: 2px $border-color solid;
+    color: $border-color;
+    transition: .2s;
+
+    &:hover {
+      border-color: #6E260E;
+      color: #6E260E;
+    }
+  }
+}

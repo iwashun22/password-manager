@@ -1,5 +1,5 @@
 const { db } = require('./initData.cjs');
-const { defaultEncrypt, defaultDecrypt, encrypt, decrypt, generateKey, separateIV } = require('./encryption.cjs');
+const { defaultEncrypt, defaultDecrypt, encrypt, decrypt, generateKey, separateIV, checkRecoveryKeySize } = require('./encryption.cjs');
 const { hashPassword, comparePassword, mapPasswordData, faviconUrl, passwordAttemptStamp, clearAllAttempts } = require('./helper.cjs');
 const { clipboard } = require('electron');
 const fs = require('node:fs');
@@ -19,6 +19,7 @@ async function createEmailAccount(event, email, password) {
   }
   catch (err) {
     console.log(err);
+    return null;
   }
 }
 
@@ -55,16 +56,16 @@ async function getAllEmailAccounts() {
   }
 }
 
-async function getEmailAccount(event, emailId) {
+async function getEmailAccount(event, email) {
   try {
     let data = undefined;
-    if (typeof emailId === 'number') {
+    if (typeof email === 'number') {
       const statement = db.prepare('SELECT * FROM email_accounts WHERE id = ?');
-      data = statement.get(emailId);
+      data = statement.get(email);
     }
     else {
       const statement = db.prepare('SELECT * FROM email_accounts WHERE email = ?');
-      data = statement.get(emailId);
+      data = statement.get(email);
     }
 
     return data === undefined ? undefined : mapPasswordData(data);
@@ -588,25 +589,102 @@ async function getBackupData(event) {
 }
 
 async function loadBackupData(event, data, recoveryKey) {
+  let json;
   try {
-    const [recoverToken, jsonString] = data.split('\n');
+    const [recoverToken, encryptedJson] = data.split('\n');
     const recoverTokenBuffer = Buffer.from(recoverToken, "base64");
-    const { IV, encrypted: randomKey } = separateIV(recoveryKey);
+    const { IV, encrypted: randomKey } = separateIV(recoveryKey, false);
     const key = decrypt(Buffer.concat([IV, recoverTokenBuffer]), randomKey);
-    console.log(key);
+    const jsonString = decrypt(encryptedJson, Buffer.from(key, "base64"));
+    json = JSON.parse(jsonString);
+
+    const insert = db.prepare('INSERT INTO keys (used_in, key_string) VALUES (@key, @value)');
+    const bulkCreate = db.transaction((arr) => {
+      for (const item of arr) insert.run(item);
+    });
+    const initialLockData = defaultEncrypt(`0::${Date.now()}`);
+    bulkCreate([
+      { key: SYSTEM_TOKEN_KEY, value: key },
+      { key: SYSTEM_RECOVERY_KEY, value: recoverToken },
+      { key: SYSTEM_LOCKED, value: initialLockData }
+    ]);
   }
   catch (err) {
-
+    console.log(err);
+    return null;
   }
+
+  db.prepare('INSERT INTO keys (used_in, key_string) VALUES (?, ?)')
+    .run(SYSTEM_PASSWORD_KEY, json["password"]);
   const emailMap = new Map();
 
   for (const email of json["emails"]) {
-    try {
+    const info = await createEmailAccount(undefined, email["email"], email["password"]);
+    if (info === null) {
+      const existingEmail = await getEmailAccount(undefined, email["email"]);
+      if (existingEmail) {
+        emailMap.set(existingEmail.email, existingEmail.id);
+      }
+    }
+    else {
+      emailMap.set(email["email"], info.lastInsertRowid);
+    }
+  }
 
+  const mapped = json["services"].map(service => {
+    const accounts = service["accounts"].map(account => {
+      const emailId = emailMap.get(account["email"]) || null;
+      const encryptedPassword = account["password"] ? defaultEncrypt(account["password"]) : '';
+      delete account["email"];
+      delete account["password"];
+
+      return {
+        ...account,
+        "encrypted": encryptedPassword,
+        "email_id": emailId,
+      }
+    })
+
+    return {
+      ...service,
+      "accounts": accounts
+    }
+  });
+
+  return mapped;
+}
+
+async function loadEachService(event, json) {
+  const info = await createService(undefined, json["service_name"], json["domain_name"], json["description_text"]);
+
+  if (!info) throw new Error('Failed creating a service');
+
+  const id = info.lastInsertRowid;
+
+  const success = [];
+  for (const account of json["accounts"]) {
+    try {
+      const decrypted = account["encrypted"] ? defaultDecrypt(account["encrypted"]) : '';
+      const info = await createServiceAccount(undefined, id, account["email_id"], account["subaddress"], account["username"], decrypted, account["oauth_provider"]);
+
+      if (info) success.push(info);
     }
     catch (err) {
-
+      console.log(err);
+      continue;
     }
+  }
+
+  return json["accounts"].length === success.length;
+}
+
+async function checkKeySize(event, keyString) {
+  try {
+    return checkRecoveryKeySize(keyString);
+  }
+  catch (err) {
+    console.log(err);
+    return null;
   }
 }
 
@@ -630,9 +708,12 @@ module.exports = {
   getSystemPassword,
   verifyPassword,
   requestDecryptedPassword,
-  getBackupData,
   storePassword,
   updatePassword,
   retryFetchFavicon,
   formattingEmail,
+  getBackupData,
+  loadBackupData,
+  loadEachService,
+  checkKeySize
 }

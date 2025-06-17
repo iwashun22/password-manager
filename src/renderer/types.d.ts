@@ -4,7 +4,7 @@ export {}
 declare global {
   interface Window {
     db: {
-      createEmailAccount: (email: string, password: string) => Promise<any>;
+      createEmailAccount: (email: string, password: string) => Promise<Info | null>;
       createServiceAccount: (serviceId: number, emailId: number | null, subaddress: string | null, username: string, password: string, oAuthProvider: string | null) => Promise<Info | null>;
       createService: <T extends string>(serviceName: T, domain: T, description: T) => Promise<Info | null>;
       getAllEmailAccounts: () => Promise<Array<EmailProp>>;
@@ -33,7 +33,10 @@ declare global {
       saveDatabase: () => Promise<void>;
     };
     backup: {
-      getBackupData: () => Promise<string | null>
+      getBackupData: () => Promise<string | null>;
+      loadBackupData: (data: string, recoveryKey: string) => Promise<Array<object> | null>;
+      loadEachService: (json: object) => Promise<boolean>;
+      checkKeySize: (keyString: string) => Promise<boolean | null>;
     }
   }
 

@@ -1,0 +1,28 @@
+.loading {
+  width: 80vw;
+  max-width: 300px;
+  margin: auto;
+
+  .load-text {
+    text-transform: capitalize;
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .load-bar {
+    height: 6px;
+    border: 1px white solid;
+    display: flex;
+    flex-direction: row;
+    box-sizing: content-box;
+
+    .bar {
+      display: inline-block;
+      height: 100%;
+
+      &.fill {
+        background-color: green;
+      }
+    }
+  }
+}

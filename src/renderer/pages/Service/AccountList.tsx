@@ -108,8 +108,9 @@ function AccountList() {
           Accounts for <i className="highlight">{serviceName}</i>
         </h1>
         {
-          description &&
-          <p className="description">{ description }</p>
+          description ?
+          <p className="description">{ description }</p> :
+          <div className="spacer"></div>
         }
         <div className="edit-btn-container">
           <button className="btn" onClick={openForm}>

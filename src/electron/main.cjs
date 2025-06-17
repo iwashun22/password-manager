@@ -27,7 +27,10 @@ const {
   updatePassword,
   deleteAllData,
   formattingEmail,
-  retryFetchFavicon
+  retryFetchFavicon,
+  loadBackupData,
+  loadEachService,
+  checkKeySize
 } = require('./utils/eventHandler.cjs');
 const { getOrCreateKey } = require('./utils/helper.cjs');
 
@@ -61,6 +64,9 @@ ipcMain.handle('user:formatting-email', formattingEmail);
 ipcMain.handle('user:save-database', encryptDB);
 
 ipcMain.handle('backup:get-backup-data', getBackupData);
+ipcMain.handle('backup:load-backup-data', loadBackupData);
+ipcMain.handle('backup:load-each-service', loadEachService);
+ipcMain.handle('backup:check-key-size', checkKeySize);
 
 const createWindow = () => {
   const win = new BrowserWindow({

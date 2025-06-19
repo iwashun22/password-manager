@@ -90,7 +90,7 @@ function Settings() {
               onCancel={() => { choseSettingSignal.value = 0; }}
               type='danger'
             >
-              <h3>Are you sure you want to delete all the data?</h3>
+              <h3>Are you sure you want to delete all data?</h3>
             </Confirmation>
           }
           <BackButton onClick={navigateHome}/>

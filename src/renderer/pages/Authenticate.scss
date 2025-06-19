@@ -8,3 +8,20 @@
     flex: 1;
   }
 }
+
+.recovery-key-option {
+  cursor: pointer;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  font-size: 16px;
+  padding-block: 14px;
+  translate: -50% 0;
+  text-wrap: nowrap;
+  color: #6495ED;
+
+  &:hover {
+    color: #4169E1;
+    text-decoration: underline;
+  }
+}

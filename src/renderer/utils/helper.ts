@@ -63,10 +63,10 @@ export function countDownTimeout(remainingSecond: number, callback: (second: num
 }
 
 export function formattingTime(second: number) {
-  if (second <= 60) {
+  if (second < 60) {
     return `${second} seconds`;
   }
 
-  const minute = Math.floor(second / 60);
+  const minute = Math.round(second / 60);
   return `${minute} minutes`;
 }

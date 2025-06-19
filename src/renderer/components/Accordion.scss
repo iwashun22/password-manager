@@ -1,0 +1,81 @@
+$padding-inline: 14px;
+$transition: .3s;
+$text-padding: 20px;
+$border: 1px white solid;
+
+.accordion {
+  background-color: rgb(58, 58, 58);
+  width: 80vw;
+  max-width: 650px;
+  border-bottom: $border;
+  border-left: $border;
+  border-right: $border;
+  overflow: hidden;
+
+  &:first-child {
+    border-top: $border;
+  }
+
+  .accordion-header {
+    cursor: default;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: $padding-inline 20px;
+    transition: $transition;
+
+    .text {
+      flex: 1;
+      text-align: start;
+      padding-inline: $text-padding;
+      font-size: 20px;
+    }
+
+    .toggle-btn {
+      display: block;
+      padding: 4px;
+      background-color: transparent;
+
+      .icon {
+        $size: 30px;
+        display: block;
+        width: $size;
+        height: $size;
+        color: #6699CC;
+      }
+    }
+  }
+
+  .accordion-body {
+    height: 0;
+    overflow: hidden;
+    background-color: #141414;
+    padding-inline: $padding-inline;
+    box-sizing: content-box;
+    transition: $transition;
+
+    * {
+      text-align: justify;
+      padding-inline: $text-padding;
+      font-size: 17px;
+    }
+  }
+
+  &.open {
+    .accordion-header {
+      background-color: rgb(95, 95, 95);
+
+      .toggle-btn .icon {
+        color: #7CB9E8;
+      }
+    }
+
+    .accordion-body {
+      height: var(--max-height);
+      max-height: 60vh;
+      overflow: scroll;
+      padding-block: 12px;
+    }
+  }
+}

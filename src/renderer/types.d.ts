@@ -26,6 +26,7 @@ declare global {
       getSystemPassword: () => Promise<{ id: number, used_in: string, hashed_password: string }>;
       storePassword: (password: string) => Promise<string | null>;
       verifyPassword: (password: string) => Promise<boolean | number>;
+      verifyRecoveryKey: (recoveryKey: string) => Promise<boolean>;
       updatePassword: (password: string) => Promise<Info | null>;
       requestDecryptedPassword: <T extends RequestType>(encryptedPassword: string, request: T) => Promise<DecryptReturn<T>>;
       formattingEmail: (emailId: number, subaddress: string) => Promise<string | null>;

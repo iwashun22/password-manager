@@ -21,6 +21,7 @@ const {
   deleteServiceAccount,
   getSystemPassword,
   verifyPassword,
+  verifyRecoveryKey,
   requestDecryptedPassword,
   getBackupData,
   storePassword,
@@ -58,6 +59,7 @@ ipcMain.handle('user:get-system-pw', getSystemPassword);
 ipcMain.handle('user:store-password', storePassword);
 ipcMain.handle('user:update-password', updatePassword);
 ipcMain.handle('user:verify-password', verifyPassword);
+ipcMain.handle('user:verify-recovery-key', verifyRecoveryKey);
 ipcMain.handle('user:request-decrypted-password', requestDecryptedPassword);
 ipcMain.handle('user:retry-fetch-favicon', retryFetchFavicon);
 ipcMain.handle('user:formatting-email', formattingEmail);

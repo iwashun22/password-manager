@@ -64,7 +64,8 @@ function passwordAttemptStamp(fill = false) {
 
   if (passwordAttempts.length === 0) {
     passwordAttempts.push(recent);
-    return [...passwordAttempts];
+    if (!fill)
+      return [...passwordAttempts];
   }
 
   if (fill) {

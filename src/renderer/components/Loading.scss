@@ -11,7 +11,7 @@
 
   .load-bar {
     height: 6px;
-    border: 1px white solid;
+    border: 1px #F9F6EE solid;
     display: flex;
     flex-direction: row;
     box-sizing: content-box;
@@ -21,7 +21,7 @@
       height: 100%;
 
       &.fill {
-        background-color: green;
+        background-color: #8cc751;
       }
     }
   }

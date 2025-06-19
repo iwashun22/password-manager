@@ -110,7 +110,9 @@ function Backup(props: Props) {
   return (
     <form onSubmit={handleSubmit}>
       <FileDragInput fileRef={fileRef} />
+      <br />
       <RecoveryKeyInput keyInputRef={recoveryKeyRef}/>
+      <br />
       <CardButtonIcon type='submit' text='proceed' />
     </form>
   )

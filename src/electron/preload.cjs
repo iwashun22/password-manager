@@ -50,6 +50,8 @@ contextBridge.exposeInMainWorld('user', {
     ipcRenderer.invoke('user:update-password', password),
   verifyPassword: (password) =>
     ipcRenderer.invoke('user:verify-password', password),
+  verifyRecoveryKey: (key) =>
+    ipcRenderer.invoke('user:verify-recovery-key', key),
   requestDecryptedPassword: (encryptedPassword, request) =>
     ipcRenderer.invoke('user:request-decrypted-password', encryptedPassword, request),
   retryFetchFavicon: (serviceId, domain) =>

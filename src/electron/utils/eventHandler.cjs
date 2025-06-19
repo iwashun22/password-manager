@@ -383,6 +383,9 @@ async function updatePassword(event, password) {
       WHERE used_in = ?
     `);
     const info = statement.run(hashed, SYSTEM_PASSWORD_KEY);
+    const encrypted = defaultEncrypt('0::0');
+    statement.run(encrypted, SYSTEM_LOCKED);
+    clearAllAttempts();
     return info;
   }
   catch (err) {
@@ -445,7 +448,8 @@ async function verifyPassword(event, password) {
   `);
 
   if (!isMatched) {
-    const attempts = passwordAttemptStamp();
+    const attempts = currentTimeout > 0 ?
+      passwordAttemptStamp(true) : passwordAttemptStamp();
     if (attempts.length >= 5) {
       currentTimeout += 30;
       const waitUntilNext = Date.now() + (currentTimeout * 1000);
@@ -460,6 +464,27 @@ async function verifyPassword(event, password) {
     clearAllAttempts();
   }
   return isMatched;
+}
+
+async function verifyRecoveryKey(event, recoveryKey) {
+  try {
+    const { IV, encrypted: randomKey} = separateIV(recoveryKey, false);
+    const statement = db.prepare('SELECT * FROM keys WHERE used_in = ?');
+    const token = statement.get(SYSTEM_TOKEN_KEY);
+    const recoveryToken = statement.get(SYSTEM_RECOVERY_KEY);
+
+    const recoveryTokenBuffer = Buffer.from(recoveryToken["key_string"], "base64");
+    const encrypted = Buffer.concat([IV, recoveryTokenBuffer]);
+    const decrypted = decrypt(encrypted, randomKey);
+    const tokenKey = Buffer.from(decrypted, "base64");
+
+    const tokenBuffer = Buffer.from(token["key_string"], "base64");
+    return Buffer.compare(tokenKey, tokenBuffer) === 0;
+  }
+  catch (err) {
+    console.log(err);
+    return false;
+  }
 }
 
 async function requestDecryptedPassword(event, encryptedPassword, request) {
@@ -707,6 +732,7 @@ module.exports = {
   deleteAllData,
   getSystemPassword,
   verifyPassword,
+  verifyRecoveryKey,
   requestDecryptedPassword,
   storePassword,
   updatePassword,

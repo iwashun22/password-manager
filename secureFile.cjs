@@ -80,6 +80,6 @@ function decrypt(file) {
 }
 
 function getKey() {
-  const base64 = process.env.SECRET_KEY;
+  const base64 = process.env.ENCRYPTION_KEY;
   return Buffer.from(base64, 'base64');
 }

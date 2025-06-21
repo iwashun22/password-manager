@@ -33,7 +33,6 @@ const {
   loadEachService,
   checkKeySize
 } = require('./utils/eventHandler.cjs');
-const { getOrCreateKey } = require('./utils/helper.cjs');
 
 const isDev = !app.isPackaged;
 
@@ -100,12 +99,11 @@ app.whenReady().then(() => {
     });
 
     if (choice === 1) {
-      console.log('Creating new data...');
+      console.log('\nCreating new data...\n');
       if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
 
       const newDB = new Sqlite(tempFilePath);
       initializeSchema(newDB);
-      getOrCreateKey(true);
       encryptDB();
       cleanupTemp();
     } else {
@@ -113,6 +111,7 @@ app.whenReady().then(() => {
     }
 
     app.quit();
+    return;
   }
 
   createWindow();

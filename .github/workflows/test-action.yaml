@@ -22,11 +22,11 @@ jobs:
 
     - name: Set environment variables
       run: |
-        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env.local
+        echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" > .env.local
 
     - name: Set application env
       run: |
-        echo "ENCRYPT_KEY=${{ secrets.ENCRYPT_KEY }}" > src/electron/.env
+        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > src/electron/.env
 
     - name: Decrypt encryption logic
       run: node secureFile.cjs -d src/electron/utils/encryption.cjs.enc

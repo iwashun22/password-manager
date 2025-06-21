@@ -26,7 +26,7 @@ function generateNewKey() {
 }
 
 if (key) {
-  rl.question('The key is already exist, are you sure you want to replace a new key?: ', (answer) => {
+  rl.question('The key already exists, are you sure you want to replace a new key?: ', (answer) => {
     const confirmRegex = /^(y$|yes)/i;
     if (confirmRegex.test(answer)) {
       const newKey = generateNewKey();

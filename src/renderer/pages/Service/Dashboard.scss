@@ -4,6 +4,7 @@
   @include scroll-container();
 
   .spacing {
-    margin-bottom: 14px;
+    display: inline-block;
+    margin: 8px 10px;
   }
 }

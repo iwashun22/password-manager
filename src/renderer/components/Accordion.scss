@@ -4,7 +4,43 @@ $text-padding: 20px;
 $border: 1px white solid;
 
 .accordion {
-  background-color: rgb(58, 58, 58);
+  --header-bg: #2c2c2c;
+  --header-text: #F9F6EE;
+  --open-header-bg: #333333;
+  --open-header-text: #F9F6EE;
+  --body-bg: #3f3f3f;
+  --body-text: #E2DFD2;
+
+  &.blue {
+    --open-header-bg: #0c205c;
+    --open-header-text: #6caef0;
+    --body-bg: #004170;
+    --body-text: #c2f3f3;
+  }
+
+  &.green {
+    --open-header-bg: rgb(6, 61, 6);
+    --open-header-text: rgb(135, 218, 135);
+    --body-bg: rgb(94, 142, 94);
+    --body-text: rgb(194, 249, 194);
+  }
+
+  &.purple {
+    --open-header-bg: rgb(59, 10, 97);
+    --open-header-text: rgb(182, 116, 226);
+    --body-bg: rgb(163, 87, 230);
+    --body-text: rgb(204, 174, 227);
+  }
+
+  &.orange {
+    --open-header-bg: rgb(141, 96, 0);
+    --open-header-text: rgb(240, 194, 110);
+    --body-bg: rgb(189, 146, 65);
+    --body-text: rgb(234, 219, 190);
+  }
+}
+
+.accordion {
   width: 80vw;
   max-width: 650px;
   border-bottom: $border;
@@ -22,6 +58,8 @@ $border: 1px white solid;
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    background-color: var(--header-bg);
+    color: var(--header-text);
     padding: $padding-inline 20px;
     transition: $transition;
 
@@ -50,7 +88,8 @@ $border: 1px white solid;
   .accordion-body {
     height: 0;
     overflow: hidden;
-    background-color: #141414;
+    background-color: var(--body-bg);
+    color: var(--body-text);
     padding-inline: $padding-inline;
     box-sizing: content-box;
     transition: $transition;
@@ -64,7 +103,8 @@ $border: 1px white solid;
 
   &.open {
     .accordion-header {
-      background-color: rgb(95, 95, 95);
+      background-color: var(--open-header-bg);
+      color: var(--open-header-text);
 
       .toggle-btn .icon {
         color: #7CB9E8;
@@ -73,7 +113,7 @@ $border: 1px white solid;
 
     .accordion-body {
       height: var(--max-height);
-      max-height: 60vh;
+      max-height: 40vh;
       overflow: scroll;
       padding-block: 12px;
     }

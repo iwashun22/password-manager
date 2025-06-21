@@ -9,6 +9,8 @@ import CardButtonIcon from './CardButtonIcon';
 import Loading from './Loading';
 import { triggerUpdate } from '@/utils/triggers';
 
+import './Backup.scss';
+
 interface Props {
   afterLoaded: () => void,
 }
@@ -108,7 +110,7 @@ function Backup(props: Props) {
   )
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="flex-container">
       <FileDragInput fileRef={fileRef} />
       <br />
       <RecoveryKeyInput keyInputRef={recoveryKeyRef}/>

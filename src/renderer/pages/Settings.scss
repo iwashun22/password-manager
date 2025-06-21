@@ -7,6 +7,7 @@
   margin: auto;
   width: 75vw;
   max-width: 800px;
+  padding-right: 30px;
 
   .setting-block {
     margin-bottom: 20px;
@@ -30,18 +31,18 @@
   .btn {
     $buttonTextColor: #F9F6EE;
     $buttonColor: #80669d;
+    $buttonHover: #6b5585;
     $buttonDangerColor: #BD3039;
+    $buttonDangerHover: #96252c;
 
     display: block;
     text-transform: uppercase;
-    // border: 2px $white solid;
     background-color: $buttonColor;
     color: $buttonTextColor;
     margin-bottom: 10px;
 
     &:hover {
-      // color: black;
-      // background-color: $white;
+      background-color: $buttonHover;
     }
 
     &.delete {
@@ -49,8 +50,7 @@
       background-color: $buttonDangerColor;
 
       &:hover {
-        // background-color: $color;
-        // color: #eee;
+        background-color: $buttonDangerHover;
       }
     }
   }

@@ -15,25 +15,6 @@ function comparePassword(password, hashed) {
   return bcrypt.compareSync(password, hashed);
 }
 
-function getOrCreateKey(forceCreate = false) {
-  const keyPath = path.join(app.getPath('userData'), 'key');
-
-  if (forceCreate) {
-    fs.rmSync(keyPath);
-  }
-
-  if (!fs.existsSync(keyPath)) {
-    const genKey = generateKey();
-    const encryptedKey = defaultEncrypt(genKey);
-    fs.writeFileSync(keyPath, encryptedKey, 'utf8');
-    return encryptedKey;
-  }
-
-  const secret = fs.readFileSync(keyPath, 'utf8');
-  const key = defaultDecrypt(secret);
-  return Buffer.from(key, 'base64');
-}
-
 function mapPasswordData(data) {
   const columnName = 'encrypted_password';
   const decrypted = data[columnName] !== '' ?
@@ -87,7 +68,6 @@ function passwordAttemptStamp(fill = false) {
 module.exports = {
   hashPassword,
   comparePassword,
-  getOrCreateKey,
   mapPasswordData,
   faviconUrl,
   passwordAttemptStamp,

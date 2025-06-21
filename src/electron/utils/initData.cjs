@@ -3,8 +3,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const os = require('node:os');
 const Sqlite = require('better-sqlite3');
-const { encrypt, decrypt } = require('./encryption.cjs');
-const { getOrCreateKey } = require('./helper.cjs');
+const { encrypt, decrypt, generateKeyFromMac } = require('./encryption.cjs');
 
 const encryptedFilePath = path.join(app.getPath('userData'), 'data.enc');
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'securedb-'));
@@ -32,7 +31,7 @@ function decryptDB() {
   if (!data) return new Sqlite(tempFilePath);
 
   try {
-    const decrypted = decrypt(data, getOrCreateKey(), true);
+    const decrypted = decrypt(data, generateKeyFromMac(), true);
 
     fs.writeFileSync(tempFilePath, decrypted);
     return new Sqlite(tempFilePath);
@@ -40,14 +39,14 @@ function decryptDB() {
   catch (err) {
     console.error('Failed to decrypt data:', err);
     console.log('This may be caused by an application error or because the encrypted data was modified.');
-
-    throw new Error('CorruptedData');
+    // throw new Error('CorruptedData');
+    return null;
   }
 }
 
 function encryptDB() {
   const raw = fs.readFileSync(tempFilePath);
-  const encrypted = encrypt(raw, getOrCreateKey(), true);
+  const encrypted = encrypt(raw, generateKeyFromMac(), true);
 
   fs.writeFileSync(encryptedFilePath, encrypted);
 }

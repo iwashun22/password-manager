@@ -8,7 +8,6 @@ describe('Encrypt and Decrypt text', () => {
   const encryptedData = defaultEncrypt(plaintext);
 
   test(`Encrypt text "${plaintext}"`, () => {
-
     expect(encryptedData).not.toBe(plaintext);
     expect(typeof encryptedData).toBe('string');
   })

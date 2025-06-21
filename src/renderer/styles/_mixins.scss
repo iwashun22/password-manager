@@ -10,7 +10,7 @@
 
 @mixin scroll-container() {
   height: 70vh;
-  padding: 20px 0;
+  padding: 20px 0px;
   overflow-y: scroll;
 
   scrollbar-width: thin;

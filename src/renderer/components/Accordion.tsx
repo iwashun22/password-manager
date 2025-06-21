@@ -4,11 +4,13 @@ import { ChevronDown, ChevronUp } from 'lucide-preact';
 
 import './Accordion.scss';
 
+export type ColorVariant = 'blue' | 'green' | 'purple' | 'orange' | 'gray';
 interface Props {
   headerText: string,
+  variant?: ColorVariant
 }
 
-function Accordion({ headerText, children }: PropsWithChildren<Props>) {
+function Accordion({ headerText, variant = 'gray', children }: PropsWithChildren<Props>) {
   const ref = useRef<HTMLDivElement>(null);
   const [maxHeight, setMaxHeight] = useState(0);
 
@@ -51,7 +53,7 @@ function Accordion({ headerText, children }: PropsWithChildren<Props>) {
   }, []);
 
   return (
-    <div className="accordion" ref={ref}>
+    <div className={`accordion ${variant}`} ref={ref}>
       <div className="accordion-header" onClick={handleClick}>
         <h3 className="text">{ headerText }</h3>
         <button type="button" className="toggle-btn">

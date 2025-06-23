@@ -13,7 +13,7 @@ jobs:
     outputs:
       cache-key: ${{ steps.cache-node.outputs.cache-hit }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Node.js
         uses: actions/setup-node@v3
@@ -36,7 +36,7 @@ jobs:
         run: npm run build
 
       - name: Upload built source for other jobs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: built-src
           path: |
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Download built source
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: built-src
           path: .
@@ -75,7 +75,7 @@ jobs:
         run: npm run make
 
       - name: Upload macOS artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macos-build
           path: out/make
@@ -88,7 +88,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Download built source
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: built-src
           path: .
@@ -121,7 +121,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Download built source
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: built-src
           path: .
@@ -154,19 +154,19 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Download macOS build
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: macos-build
           path: ./out/make/macos
 
       - name: Download Windows build
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: windows-build
           path: ./out/make/windows
 
       - name: Download Linux build
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: linux-build
           path: ./out/make/linux

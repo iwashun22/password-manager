@@ -2,6 +2,8 @@
   "name": "password-manager",
   "main": "src/electron/main.cjs",
   "private": true,
+  "description": "A secure and lightweight password manager.",
+  "author": "Shun Iwashita",
   "version": "0.0.0",
   "type": "module",
   "scripts": {

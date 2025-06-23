@@ -197,6 +197,9 @@ jobs:
           name: linux-build
           path: ./out/make/linux
 
+      - name: log files
+        run: find . -maxdepth 3
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1

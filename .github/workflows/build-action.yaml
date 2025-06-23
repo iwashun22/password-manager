@@ -198,7 +198,7 @@ jobs:
           path: ./out/make/linux
 
       - name: log files
-        run: find . -maxdepth 3
+        run: find ./out/make -maxdepth 3
 
       - name: Create Release
         id: create_release

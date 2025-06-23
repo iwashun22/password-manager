@@ -188,6 +188,7 @@ jobs:
           path: ./out/make/windows
 
       - name: Download Linux build
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: linux-build
@@ -220,10 +221,29 @@ jobs:
           asset_name: app-windows.exe
           asset_content_type: application/octet-stream
 
-      - name: Upload Linux assets
+      - name: Upload Linux .deb asset
+        continue-on-error: true
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./out/make/linux/*.{deb,AppImage}
+          asset_path: ./out/make/linux/*.deb
           asset_name: app-linux.deb
+          asset_content_type: application/vnd.debian.binary-package
+
+      - name: Upload Linux .AppImage asset
+        continue-on-error: true
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./out/make/linux/*.AppImage
+          asset_name: app-linux.AppImage
           asset_content_type: application/octet-stream
+
+      - name: Upload Linux .rpm asset
+        continue-on-error: true
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./out/make/linux/*.rpm
+          asset_name: app-linux.rpm
+          asset_content_type: application/x-rpm

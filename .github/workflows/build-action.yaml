@@ -32,6 +32,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Set env
+        run: |
+          echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" > .env.local
+
+      - name: Set secret env
+        run: |
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > src/electron/.env
+
+      - name: Decrypt encription logic
+        run: node secureFile.cjs -d src/electron/utils/encryption.cjs.enc
+
       - name: Build preact
         run: npm run build
 

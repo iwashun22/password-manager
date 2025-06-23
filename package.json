@@ -5,6 +5,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test": "jest",
     "dev": "concurrently -k \"vite\" \"wait-on http:localhost:5173 && electron .\"",
     "gen-key": "node gen-key.cjs",
     "build": "tsc -b && vite build",

@@ -18,7 +18,7 @@ jobs:
         node-version: '23.11.0'
 
     - name: Install dependencies
-      run: yarn install
+      run: npm install
 
     - name: Set environment variables
       run: |
@@ -35,4 +35,4 @@ jobs:
       run: npx tsc ./src/renderer/utils/helper.ts
 
     - name: Run test
-      run: yarn jest
+      run: npm run jest

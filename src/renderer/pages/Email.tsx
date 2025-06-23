@@ -60,7 +60,7 @@ function Email() {
     setSearchValue(searchRef.current?.value || '');
   }, []);
 
-  const openForm = useCallback((e: unknown) => {
+  const openForm = useCallback((_e: unknown) => {
     formOpenSignal.value = true;
   }, []);
 

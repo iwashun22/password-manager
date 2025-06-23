@@ -35,20 +35,20 @@ function ShowRecoveryKey() {
     }
   }, []);
 
-  const copyToClipboard = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+  const copyToClipboard = useCallback((_e: MouseEvent<HTMLButtonElement>) => {
     navigator.clipboard.writeText(key)
       .then(() => {
         setShowToast(true);
         setToastMessage('Copied to the clipboard!');
         allow();
       })
-      .catch((err) => {
+      .catch((_err) => {
         setShowToast(true);
         setToastMessage('');
       });
   }, [key]);
 
-  const downloadFile = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+  const downloadFile = useCallback((_e: MouseEvent<HTMLButtonElement>) => {
     const blob = new Blob([key], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -60,8 +60,8 @@ function ShowRecoveryKey() {
     allow();
   }, [key]);
 
-  const redirectHome = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    location.route('/')
+  const redirectHome = useCallback((_e: MouseEvent<HTMLButtonElement>) => {
+    location.route('/');
   }, []);
 
   useEffect(() => {

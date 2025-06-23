@@ -29,12 +29,12 @@ function PasswordInput({
     input.setSelectionRange(length, length);
   }, []);
 
-  const removeErrorTextOnChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const removeErrorTextOnChange = useCallback((_e: ChangeEvent<HTMLInputElement>) => {
     if (setErrorState === undefined) return;
     setErrorState('');
   }, [])
 
-  const hideOnFocusOut = useCallback((e: FocusEvent<HTMLInputElement>) => {
+  const hideOnFocusOut = useCallback((_e: FocusEvent<HTMLInputElement>) => {
     setIsVisible(false);
   }, []);
 
@@ -42,7 +42,7 @@ function PasswordInput({
     e.preventDefault();
   }, []);
 
-  const handleToggle = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+  const handleToggle = useCallback((_e: MouseEvent<HTMLButtonElement>) => {
     setIsVisible(!isVisible);
     requestAnimationFrame(() => {
       inputRef.current?.focus();

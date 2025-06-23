@@ -95,7 +95,7 @@ function Backup(props: Props) {
           setError('Failed to backup some accounts');
         }
       })
-      .catch(err => {
+      .catch(_err => {
         setError('Failed to backup a service');
       })
       .finally(() => {

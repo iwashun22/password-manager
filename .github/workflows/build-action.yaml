@@ -222,6 +222,8 @@ jobs:
 
       - name: Upload macos arm64 asset
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.find_dmg.outputs.path }}
@@ -237,6 +239,8 @@ jobs:
 
       - name: Upload Windows x64 assets
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.find_exe.outputs.path }}
@@ -253,6 +257,8 @@ jobs:
       - name: Upload Linux .deb asset
         continue-on-error: true
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.find_deb.outputs.path }}
@@ -278,6 +284,8 @@ jobs:
       - name: Upload Linux .rpm asset
         continue-on-error: true
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.find_rpm.outputs.path }}

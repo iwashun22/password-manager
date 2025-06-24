@@ -74,6 +74,10 @@ jobs:
           name: built-src
           path: .
 
+      - name: Restore secret
+        run: |
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > src/electron/.env
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:

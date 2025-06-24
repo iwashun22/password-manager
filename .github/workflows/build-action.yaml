@@ -98,9 +98,6 @@ jobs:
     name: Build Windows
     runs-on: windows-latest
     needs: build
-    strategy:
-      matrix:
-        arch: [x64, arm64]
     steps:
       - uses: actions/checkout@v4
 

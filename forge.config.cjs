@@ -9,7 +9,7 @@ module.exports = {
   },
   rebuildConfig: {},
   makers: [
-    {
+    process.arch === 'x64' && {
       name: '@electron-forge/maker-squirrel',
       config: {},
     },
@@ -19,10 +19,10 @@ module.exports = {
         format: 'ULFO'
       },
     },
-    {
-      name: '@electron-forge/maker-zip',
-      platforms: ['darwin'],
-    },
+    // {
+    //   name: '@electron-forge/maker-zip',
+    //   platforms: ['darwin, win32'],
+    // },
     {
       name: '@electron-forge/maker-deb',
       config: {

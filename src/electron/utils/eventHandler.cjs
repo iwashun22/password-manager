@@ -1,5 +1,5 @@
 const { db } = require('./initData.cjs');
-const { defaultEncrypt, defaultDecrypt, encrypt, decrypt, separateIV, generateToken, getRandomTokenKey, checkRecoveryKeySize } = require('./encryption.cjs');
+const { defaultEncrypt, defaultDecrypt, encrypt, decrypt, generateToken, getRandomTokenKey, checkRecoveryKeySize } = require('./encryption.cjs');
 const { hashPassword, comparePassword, mapPasswordData, faviconUrl, passwordAttemptStamp, clearAllAttempts } = require('./helper.cjs');
 const { clipboard } = require('electron');
 const fs = require('node:fs');

@@ -7,6 +7,7 @@ import Confirmation from '@/components/Confirmation';
 import { logoutSignal } from '@/components/InactivityHandler';
 import PasswordInput from '@/components/PasswordInput';
 import CardButtonIcon from '@/components/CardButtonIcon';
+import RecoveryKeyInput from '@/components/RecoveryKeyInput';
 import { setError } from '@/components/ErrorHandler';
 import { triggerUpdate } from '@/utils/triggers';
 
@@ -42,25 +43,7 @@ function Settings() {
     return () => {
       choseSettingSignal.value = mode;
 
-      if (mode === ChoseSetting.BACKUP) {
-        (async () => {
-          const data = await window.backup.getBackupData();
-          if (data === null) {
-            setError('Failed to retrieve backup');
-            return;
-          }
-
-          const a = document.createElement('a');
-          const blob = new Blob([data], { type: 'text/plain' });
-          const url = URL.createObjectURL(blob);
-          a.href = url;
-          a.download = 'backup-file.txt';
-          a.click();
-          URL.revokeObjectURL(url);
-        })();
-        return;
-      }
-      else if (mode === ChoseSetting.DELETE) {
+      if (mode === ChoseSetting.DELETE) {
         logoutSignal.value = true;
       }
     }
@@ -79,6 +62,10 @@ function Settings() {
     case ChoseSetting.PASSWORD:
       return (
         <ChangePassword backButtonOnClick={navigateBackFromSubpage}/>
+      );
+    case ChoseSetting.BACKUP:
+      return (
+        <Backup backButtonOnClick={navigateBackFromSubpage}/>
       );
     default:
       return (
@@ -236,6 +223,56 @@ function ChangePassword(props: SettingSubpageProp) {
       </form>
     </>
   );
+}
+
+function Backup(props: SettingSubpageProp) {
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleSubmit = useCallback((e: FormEvent) => {
+    e.preventDefault();
+
+    (async () => {
+      const recoveryKey = inputRef.current?.value || '';
+      if (!recoveryKey) return;
+
+      const validLength = await window.backup.checkKeySize(recoveryKey);
+
+      if (validLength === null) throw new Error('Something went wrong');
+      if (!validLength) throw new Error('Invalid key');
+
+      const validRecoveryKey = await window.user.verifyRecoveryKey(recoveryKey);
+      if (!validRecoveryKey) throw new Error('Incorrect recovery key');
+
+      const data = await window.backup.getBackupData(recoveryKey);
+      if (data === null) throw new Error('Failed to retrieve backup');
+
+      const a = document.createElement('a');
+      const blob = new Blob([data], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      a.href = url;
+      a.download = 'backup-file.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+
+      props.backButtonOnClick();
+    })()
+      .catch(err => {
+        setError(err.message);
+      });
+  }, []);
+
+  return (
+    <>
+      <BackButton onClick={props.backButtonOnClick}/>
+      <form onSubmit={handleSubmit}>
+        <RecoveryKeyInput
+          keyInputRef={inputRef}
+        />
+        <br/>
+        <CardButtonIcon type='submit' text='generate backup' />
+      </form>
+    </>
+  )
 }
 
 export default Settings;

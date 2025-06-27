@@ -34,7 +34,7 @@ declare global {
       saveDatabase: () => Promise<void>;
     };
     backup: {
-      getBackupData: () => Promise<string | null>;
+      getBackupData: (recoveryKey: string) => Promise<string | null>;
       loadBackupData: (data: string, recoveryKey: string) => Promise<Array<object> | null>;
       loadEachService: (json: object) => Promise<boolean>;
       checkKeySize: (keyString: string) => Promise<boolean | null>;

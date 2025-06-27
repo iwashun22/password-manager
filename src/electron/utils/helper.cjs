@@ -1,8 +1,5 @@
 const bcrypt = require('bcrypt');
-const { app } = require('electron');
-const fs = require('node:fs');
-const path = require('node:path');
-const { generateKey, defaultDecrypt, defaultEncrypt } = require('./encryption.cjs');
+const {  defaultDecrypt } = require('./encryption.cjs');
 
 function hashPassword(plainText) {
   const saltRound = 10;

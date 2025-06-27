@@ -70,4 +70,13 @@ function Accordion({ headerText, variant = 'gray', children }: PropsWithChildren
   )
 }
 
+export const AccordionText = {
+  Header: ({ children }: PropsWithChildren) =>
+    <h1 className="accordion-body-header">{ children }</h1>,
+  SubHeader: ({ children }: PropsWithChildren) =>
+    <h3 className="accordion-body-subheader">{ children }</h3>,
+  Paragraph: ({ children }: PropsWithChildren) =>
+    <p className="accordion-body-paragraph">{ children }</p>
+} as const;
+
 export default Accordion;

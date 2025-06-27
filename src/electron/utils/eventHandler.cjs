@@ -1,5 +1,5 @@
 const { db } = require('./initData.cjs');
-const { defaultEncrypt, defaultDecrypt, encrypt, decrypt, generateKey, separateIV, checkRecoveryKeySize } = require('./encryption.cjs');
+const { defaultEncrypt, defaultDecrypt, encrypt, decrypt, separateIV, generateToken, getRandomTokenKey, checkRecoveryKeySize } = require('./encryption.cjs');
 const { hashPassword, comparePassword, mapPasswordData, faviconUrl, passwordAttemptStamp, clearAllAttempts } = require('./helper.cjs');
 const { clipboard } = require('electron');
 const fs = require('node:fs');
@@ -344,11 +344,7 @@ async function getSystemPassword(event) {
 async function storePassword(event, password) {
   try {
     const hashed = hashPassword(password);
-    const token = generateKey();
-    const randomKey = Buffer.from(generateKey(), 'base64');
-    const encryptedToken = encrypt(token, randomKey);
-    const { IV, encrypted: recoverToken } = separateIV(encryptedToken, false);
-    const recoveryKey = Buffer.concat([IV, randomKey]).toString('base64');
+    const { token, recoveryToken, recoveryKey } = generateToken();
 
     const statement = db.prepare("INSERT INTO keys (used_in, key_string) VALUES (@keyName, @data)");
 
@@ -358,7 +354,7 @@ async function storePassword(event, password) {
     const data = [
       { keyName: SYSTEM_PASSWORD_KEY, data: hashed },
       { keyName: SYSTEM_TOKEN_KEY, data: token },
-      { keyName: SYSTEM_RECOVERY_KEY, data: recoverToken.toString('base64') },
+      { keyName: SYSTEM_RECOVERY_KEY, data: recoveryToken },
       { keyName: SYSTEM_LOCKED, data: initialLockData },
     ];
     const insert = db.transaction((arr) => {
@@ -468,18 +464,17 @@ async function verifyPassword(event, password) {
 
 async function verifyRecoveryKey(event, recoveryKey) {
   try {
-    const { IV, encrypted: randomKey} = separateIV(recoveryKey, false);
     const statement = db.prepare('SELECT * FROM keys WHERE used_in = ?');
     const token = statement.get(SYSTEM_TOKEN_KEY);
     const recoveryToken = statement.get(SYSTEM_RECOVERY_KEY);
 
-    const recoveryTokenBuffer = Buffer.from(recoveryToken["key_string"], "base64");
-    const encrypted = Buffer.concat([IV, recoveryTokenBuffer]);
-    const decrypted = decrypt(encrypted, randomKey);
-    const tokenKey = Buffer.from(decrypted, "base64");
+    const randomKey = getRandomTokenKey({ 
+      token: token["key_string"],
+      recoveryToken: recoveryToken["key_string"],
+      recoveryKey: recoveryKey
+    });
 
-    const tokenBuffer = Buffer.from(token["key_string"], "base64");
-    return Buffer.compare(tokenKey, tokenBuffer) === 0;
+    return randomKey !== null;
   }
   catch (err) {
     console.log(err);
@@ -557,18 +552,25 @@ async function retryFetchFavicon(event, serviceId, domain, override = false) {
   }
 }
 
-async function getBackupData(event) {
+async function getBackupData(event, recoveryKey) {
   try {
     const servicesData = db.prepare('SELECT * FROM services').all();
     const emailsData = db.prepare('SELECT * FROM email_accounts').all();
     const accountsData = db.prepare('SELECT * FROM service_accounts').all();
-    const recoverToken = db.prepare('SELECT * FROM keys WHERE used_in = ?').get(SYSTEM_RECOVERY_KEY);
-    const encryptionKey = db.prepare('SELECT * FROM keys WHERE used_in = ?').get(SYSTEM_TOKEN_KEY);
+    const token = db.prepare('SELECT * FROM keys WHERE used_in = ?').get(SYSTEM_TOKEN_KEY);
+    const recoveryToken = db.prepare('SELECT * FROM keys WHERE used_in = ?').get(SYSTEM_RECOVERY_KEY);
     const password = db.prepare('SELECT * FROM keys WHERE used_in = ?').get(SYSTEM_PASSWORD_KEY);
 
     if (!password["key_string"]) {
       throw new Error('no password found');
     }
+    const randomKey = getRandomTokenKey({
+      token: token["key_string"],
+      recoveryToken: recoveryToken["key_string"],
+      recoveryKey: recoveryKey
+    });
+
+    if (randomKey === null) throw new Error('Unable to get recovery token');
 
     const emailMap = new Map(emailsData.map(v => [v.id, v.email]));
     const mappedAccounts = accountsData.map(v => {
@@ -603,9 +605,14 @@ async function getBackupData(event) {
       "password": password["key_string"],
     }
     const jsonString = JSON.stringify(formatted);
-    const keyBuffer = Buffer.from(encryptionKey["key_string"], 'base64');
-    const encrypted = encrypt(jsonString, keyBuffer);
-    return recoverToken["key_string"] + '\n' + encrypted;
+    const encrypted = encrypt(jsonString, randomKey);
+
+    const tokenBuffer = Buffer.from(token["key_string"], "base64");
+    const recoverBuffer = Buffer.from(recoveryToken["key_string"], "base64");
+    const firstByte = new Uint8Array([tokenBuffer.length]);
+    const concat = Buffer.concat([firstByte, tokenBuffer, recoverBuffer]).toString("base64");
+
+    return concat + '\n' + encrypted;
   }
   catch(err) {
     console.log(err);
@@ -616,11 +623,19 @@ async function getBackupData(event) {
 async function loadBackupData(event, data, recoveryKey) {
   let json;
   try {
-    const [recoverToken, encryptedJson] = data.split('\n');
-    const recoverTokenBuffer = Buffer.from(recoverToken, "base64");
-    const { IV, encrypted: randomKey } = separateIV(recoveryKey, false);
-    const key = decrypt(Buffer.concat([IV, recoverTokenBuffer]), randomKey);
-    const jsonString = decrypt(encryptedJson, Buffer.from(key, "base64"));
+    const [tokens, encryptedJson] = data.split('\n');
+    const buffer = Buffer.from(tokens, "base64");
+
+    const tokenSize = buffer.at(0);
+    const token = buffer.subarray(1, tokenSize + 1);
+    const recoveryToken = buffer.subarray(61);
+
+    const randomKey = getRandomTokenKey({
+      token: token,
+      recoveryToken: recoveryToken,
+      recoveryKey: recoveryKey
+    })
+    const jsonString = decrypt(encryptedJson, randomKey);
     json = JSON.parse(jsonString);
 
     const insert = db.prepare('INSERT INTO keys (used_in, key_string) VALUES (@key, @value)');
@@ -629,8 +644,8 @@ async function loadBackupData(event, data, recoveryKey) {
     });
     const initialLockData = defaultEncrypt(`0::${Date.now()}`);
     bulkCreate([
-      { key: SYSTEM_TOKEN_KEY, value: key },
-      { key: SYSTEM_RECOVERY_KEY, value: recoverToken },
+      { key: SYSTEM_TOKEN_KEY, value: token.toString("base64") },
+      { key: SYSTEM_RECOVERY_KEY, value: recoveryToken.toString("base64") },
       { key: SYSTEM_LOCKED, value: initialLockData }
     ]);
   }

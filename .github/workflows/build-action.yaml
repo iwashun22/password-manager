@@ -33,7 +33,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Set env
         run: |
@@ -56,7 +56,7 @@ jobs:
           path: |
             node_modules
             dist
-            src
+            src/electron
             package.json
             package-lock.json
 

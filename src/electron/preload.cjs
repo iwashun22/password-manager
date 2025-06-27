@@ -63,8 +63,8 @@ contextBridge.exposeInMainWorld('user', {
 });
 
 contextBridge.exposeInMainWorld('backup', {
-  getBackupData: () =>
-    ipcRenderer.invoke('backup:get-backup-data'),
+  getBackupData: (recoveryKey) =>
+    ipcRenderer.invoke('backup:get-backup-data', recoveryKey),
   loadBackupData: (data, recoveryKey) =>
     ipcRenderer.invoke('backup:load-backup-data', data, recoveryKey),
   loadEachService: (json) =>

@@ -3,7 +3,7 @@
   "license": "MIT",
   "main": "src/electron/main.cjs",
   "private": true,
-  "description": "A secure and lightweight password manager.",
+  "description": "Offline password manager: secure encryption, no server.",
   "author": "Shun Iwashita",
   "version": "0.0.0",
   "type": "module",
@@ -28,7 +28,8 @@
     "lucide-preact": "^0.501.0",
     "preact": "^10.26.4",
     "preact-iso": "^2.9.1",
-    "preact-render-to-string": "^6.5.13"
+    "preact-render-to-string": "^6.5.13",
+    "electron": "^36.5.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.1",
@@ -44,7 +45,6 @@
     "@typescript-eslint/eslint-plugin": "^8.31.0",
     "@typescript-eslint/parser": "^8.31.0",
     "concurrently": "^9.1.2",
-    "electron": "^36.5.0",
     "electron-rebuild": "^3.2.9",
     "eslint": "^9.25.1",
     "eslint-import-resolver-typescript": "^4.3.4",

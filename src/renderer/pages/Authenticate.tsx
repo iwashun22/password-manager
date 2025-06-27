@@ -77,9 +77,9 @@ function Authenticate() {
       if (validKey === null) throw new Error('Something went wrong');
       if (!validKey) throw new Error('Invalid key');
 
-      const tokenMatched = await window.user.verifyRecoveryKey(keyString);
+      const success = await window.user.verifyRecoveryKey(keyString);
 
-      if (!tokenMatched) throw new Error('Incorrect reovery key');
+      if (!success) throw new Error('Incorrect reovery key');
 
       setVerified(true);
     })()

@@ -3,7 +3,11 @@ const {
   defaultDecrypt,
   aesCipher,
   generateToken,
-  getRandomTokenKey
+  getRandomTokenKey,
+  makeBackupFile,
+  getBackupTokens,
+  encrypt,
+  decrypt
 } = require('../src/electron/utils/encryption.cjs');
 const crypto = require('crypto');
 
@@ -58,5 +62,41 @@ describe('Generate token & get random key', () => {
     })
 
     expect(randomKey).not.toBe(null);
+  })
+});
+
+describe('Making & Reading Backup file', () => {
+  test('Can retrieve tokens from backup file', () => {
+    // generate tokens
+    const { token, recoveryKey, recoveryToken } = generateToken();
+    // get random keys
+    const randomKey = getRandomTokenKey({ token, recoveryKey, recoveryToken });
+
+    // make file format
+    const foo = "hello world";
+    const encrypted = encrypt(foo, randomKey);
+    const file = makeBackupFile({ token, recoveryToken, recoveryKey }, encrypted);
+
+      expect(typeof file).toBe("string");
+
+    // get tokens from the file format
+    const { encrypted: fileData, recoveryToken: _r_token, token: _token } = getBackupTokens(file);
+
+      expect(token).toBe(_token);
+      expect(recoveryToken).toBe(_r_token);
+      expect(encrypted).toBe(fileData);
+
+    // get random key from the file data
+    const _random_key = getRandomTokenKey({
+      token: _token,
+      recoveryToken: _r_token,
+      recoveryKey: recoveryKey
+    });
+
+      expect(Buffer.compare(randomKey, _random_key)).toBe(0);
+
+    const bar = decrypt(fileData, _random_key);
+
+      expect(foo).toBe(bar);
   })
 });

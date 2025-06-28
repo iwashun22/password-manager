@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+env:
+  ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
 jobs:
   build:
     name: Install dependencies and build preact
@@ -34,14 +38,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Set env
-        run: |
-          echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" > .env.local
-
-      - name: Set secret env
-        run: |
-          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > src/electron/.env
 
       - name: Decrypt encription logic
         run: node secureFile.cjs -d src/electron/utils/encryption.cjs.enc
@@ -73,10 +69,6 @@ jobs:
         with:
           name: built-src
           path: .
-
-      - name: Restore secret
-        run: |
-          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > src/electron/.env
 
       - name: Setup Node.js
         uses: actions/setup-node@v3

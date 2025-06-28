@@ -1,5 +1,5 @@
 const { db } = require('./initData.cjs');
-const { defaultEncrypt, defaultDecrypt, encrypt, decrypt, generateToken, getRandomTokenKey, checkRecoveryKeySize } = require('./encryption.cjs');
+const { defaultEncrypt, defaultDecrypt, encrypt, decrypt, generateToken, getRandomTokenKey, checkRecoveryKeySize, makeBackupFile, getBackupTokens } = require('./encryption.cjs');
 const { hashPassword, comparePassword, mapPasswordData, faviconUrl, passwordAttemptStamp, clearAllAttempts } = require('./helper.cjs');
 const { clipboard } = require('electron');
 const fs = require('node:fs');
@@ -607,12 +607,15 @@ async function getBackupData(event, recoveryKey) {
     const jsonString = JSON.stringify(formatted);
     const encrypted = encrypt(jsonString, randomKey);
 
-    const tokenBuffer = Buffer.from(token["key_string"], "base64");
-    const recoverBuffer = Buffer.from(recoveryToken["key_string"], "base64");
-    const firstByte = new Uint8Array([tokenBuffer.length]);
-    const concat = Buffer.concat([firstByte, tokenBuffer, recoverBuffer]).toString("base64");
+    const file = makeBackupFile(
+      {
+        token: token["key_string"],
+        recoveryToken: recoveryToken["key_string"]
+      },
+      encrypted
+    );
 
-    return concat + '\n' + encrypted;
+    return file;
   }
   catch(err) {
     console.log(err);
@@ -623,19 +626,14 @@ async function getBackupData(event, recoveryKey) {
 async function loadBackupData(event, data, recoveryKey) {
   let json;
   try {
-    const [tokens, encryptedJson] = data.split('\n');
-    const buffer = Buffer.from(tokens, "base64");
-
-    const tokenSize = buffer.at(0);
-    const token = buffer.subarray(1, tokenSize + 1);
-    const recoveryToken = buffer.subarray(61);
+    const { token, recoveryToken, encrypted } = getBackupTokens(data);
 
     const randomKey = getRandomTokenKey({
       token: token,
       recoveryToken: recoveryToken,
       recoveryKey: recoveryKey
     })
-    const jsonString = decrypt(encryptedJson, randomKey);
+    const jsonString = decrypt(encrypted, randomKey);
     json = JSON.parse(jsonString);
 
     const insert = db.prepare('INSERT INTO keys (used_in, key_string) VALUES (@key, @value)');

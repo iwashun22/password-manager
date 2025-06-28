@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TEST_CODE: ${{ vars.TEST_CODE }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     steps:
     - name: Checkout code
@@ -21,14 +23,6 @@ jobs:
 
     - name: Install dependencies
       run: npm install
-
-    - name: Set environment variables
-      run: |
-        echo "ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}" > .env.local
-
-    - name: Set application env
-      run: |
-        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > src/electron/.env
 
     - name: Decrypt encryption logic
       run: node secureFile.cjs -d src/electron/utils/encryption.cjs.enc

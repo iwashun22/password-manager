@@ -2,6 +2,7 @@ const {
   defaultEncrypt,
   defaultDecrypt,
   aesCipher,
+  generateKeyFromMac,
   generateToken,
   getRandomTokenKey,
   makeBackupFile,
@@ -38,6 +39,15 @@ describe('AES cipher', () => {
 
     expect(Buffer.compare(encrypted, data)).not.toBe(0);
     expect(Buffer.compare(decrypted, data)).toBe(0);
+  })
+});
+
+describe('Generate key from MAC address', () => {
+  test('Generate key from MAC address', () => {
+    const key = generateKeyFromMac();
+
+    expect(key.length).toBe(32);
+    expect(Buffer.isBuffer(key)).toBe(true);
   })
 });
 

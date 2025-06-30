@@ -95,7 +95,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os.name }}
-          path: out/make/${{ matrix.os.name }}
+          path: out/make
 
   build-windows:
     name: Build Windows
@@ -228,12 +228,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.binaries.platform}}
-          path: ./out/make/${{ matrix.binaries.platform }}
+          path: out/make
 
       - name: Find ${{ matrix.binaries.platform }} .${{ matrix.binaries.extension }} asset
         id: find_extension
         run: |
-          file_path=$(find ./out/make/${{ matrix.binaries.platform }} -type f -name '*.${{ matrix.binaries.extension }}' | head -n 1)
+          file_path=$(find ./out/make -type f -name '*.${{ matrix.binaries.extension }}' | head -n 1)
           echo "Found file: $file_path"
           echo "path=$file_path" >> "$GITHUB_OUTPUT"
 

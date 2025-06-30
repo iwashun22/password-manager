@@ -9,12 +9,14 @@ on:
 permissions:
   contents: write
 
+env:
+  ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
 jobs:
   build:
     name: Install dependencies and build preact
     runs-on: ubuntu-latest
-    env:
-      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
     outputs:
       cache-key: ${{ steps.cache-node.outputs.cache-hit }}
     steps:
@@ -89,7 +91,7 @@ jobs:
         run: npm run rebuild
 
       - name: Package app
-        run: npm run make
+        run: npm run make:gh-release
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
@@ -127,7 +129,7 @@ jobs:
         run: npm run rebuild
 
       - name: Package app
-        run: npm run make
+        run: npm run make:gh-release
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
@@ -173,7 +175,7 @@ jobs:
         run: npm run rebuild
 
       - name: Package app (make .deb, .AppImage, etc.)
-        run: npm run make
+        run: npm run make:gh-release
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4

@@ -180,6 +180,7 @@ jobs:
   create-github-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
     steps:
       - uses: actions/checkout@v4
 

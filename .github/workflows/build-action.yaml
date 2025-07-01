@@ -42,7 +42,7 @@ jobs:
         run: node secureFile.cjs -d src/electron/utils/encryption.cjs.enc
 
       - name: Set env file
-        run: echo "SECRE_KEY${{ secrets.SECRET_KEY }}" > ./src/electron/.env
+        run: echo "SECRET_KEY${{ secrets.SECRET_KEY }}" > ./src/electron/.env
 
       - name: Build preact
         run: npm run build

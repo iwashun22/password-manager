@@ -17,8 +17,7 @@
     "preview": "vite preview",
     "update-encryption": "node secureFile.cjs -e ./src/electron/utils/encryption.cjs",
     "package": "electron-forge package",
-    "make": "electron-forge make",
-    "make:gh-release": "cross-env ENCRYPTION_KEY=$ENCRYPTION_KEY SECRET_KEY=$SECRET_KEY electron-forge make"
+    "make": "electron-forge make"
   },
   "dependencies": {
     "@preact/signals": "^2.0.4",

@@ -91,7 +91,7 @@ jobs:
         run: npm run rebuild
 
       - name: Package app
-        run: npm run make:gh-release
+        run: npm run make
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
@@ -129,7 +129,7 @@ jobs:
         run: npm run rebuild
 
       - name: Package app
-        run: npm run make:gh-release
+        run: npm run make
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
@@ -175,7 +175,7 @@ jobs:
         run: npm run rebuild
 
       - name: Package app (make .deb, .AppImage, etc.)
-        run: npm run make:gh-release
+        run: npm run make
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4

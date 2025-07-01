@@ -75,7 +75,7 @@ jobs:
           node-version: '23.11.0'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Compile helper.ts to helper.js
         run: npx tsc ./src/renderer/utils/helper.ts

@@ -65,7 +65,6 @@ function decrypt(file) {
   const nonce = buffer.subarray(0, 12);
   const encrypted = buffer.subarray(12, buffer.length - TAG_LENGTH);
   const tag = buffer.subarray(buffer.length - TAG_LENGTH);
-  console.log(tag);
   const key = getKey();
   const decipher = crypto.createDecipheriv('aes-256-ccm', key, nonce, {
     authTagLength: TAG_LENGTH

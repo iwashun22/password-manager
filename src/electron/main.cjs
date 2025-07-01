@@ -82,6 +82,8 @@ const createWindow = () => {
     }
   });
 
+  win.webContents.openDevTools(); // memo: temporarily enable devTools
+
   if (isDev) {
     win.loadURL('http://localhost:5173');
     win.webContents.openDevTools();

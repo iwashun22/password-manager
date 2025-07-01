@@ -75,7 +75,10 @@ const createWindow = () => {
     height: 500,
     icon: path.resolve(__dirname, '../../icons/icon/icon.png'),
     webPreferences: {
-      preload: path.join(__dirname, 'preload.cjs')
+      preload: path.join(__dirname, 'preload.cjs'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      devTools: true, // memo: temporarily enable devTools
     }
   });
 

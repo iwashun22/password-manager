@@ -9,7 +9,7 @@ const rl = readline.createInterface({
 });
 
 const arg_path = process.argv[2] || 'src/electron/.env';
-const KEY_NAME = process.argv[3] || 'ENCRYPT_KEY';
+const KEY_NAME = process.argv[3] || 'SECRET_KEY';
 
 const KEY_PATH = path.join(__dirname, arg_path);
 

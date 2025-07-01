@@ -1,6 +1,8 @@
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 const path = require('node:path');
+const fs = require('node:fs');
+const { generateKey } = require('./src/electron/utils/encryption.cjs');
 
 module.exports = {
   packagerConfig: {
@@ -53,4 +55,13 @@ module.exports = {
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
+  hooks: {
+    generateAssets: async (forgeConfig, buildPath) => {
+      const FILE_PATH = path.resolve(__dirname, 'src/electron/.env');
+      const key = generateKey();
+      const format = `SECRET_KEY="${key}"\n`;
+      fs.writeFileSync(FILE_PATH, format, 'utf8');
+      console.log('Env file generated.');
+    }
+  }
 };

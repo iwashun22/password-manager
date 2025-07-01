@@ -41,9 +41,6 @@ jobs:
       - name: Decrypt encription logic
         run: node secureFile.cjs -d src/electron/utils/encryption.cjs.enc
 
-      - name: Set env file
-        run: echo "SECRET_KEY${{ secrets.SECRET_KEY }}" > ./src/electron/.env
-
       - name: Build preact
         run: npm run build
 
@@ -55,7 +52,6 @@ jobs:
             node_modules
             dist
             src/electron
-            src/electron/.env
             package.json
             package-lock.json
 

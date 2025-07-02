@@ -12,7 +12,6 @@ import Email from './pages/Email';
 import Services from './pages/Services';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
-import NotFound from './pages/NotFound';
 import './app.scss';
 
 export function App() {
@@ -45,7 +44,7 @@ export function App() {
         <Route path="/services/*" component={Services}/>
         <Route path="/settings" component={Settings} />
         <Route path="/help" component={Help} />
-        <Route path="*" component={NotFound} />
+        <Route path="*" component={Home} />
       </Router>
     </LocationProvider>
   )

@@ -38,7 +38,6 @@ function InactivityHandler({ excludePaths }: Props) {
 
     if (!excludePaths.includes(currentPath)) {
       previousPath.value = currentPath;
-      console.log(previousPath.value); // memo: temporary debug log
     }
 
     const resetInactivityTimer = () => {

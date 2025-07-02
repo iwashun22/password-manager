@@ -78,11 +78,8 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
       contextIsolation: true,
-      devTools: true, // memo: temporarily enable devTools
     }
   });
-
-  win.webContents.openDevTools(); // memo: temporarily enable devTools
 
   if (isDev) {
     win.loadURL('http://localhost:5173');

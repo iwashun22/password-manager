@@ -3,7 +3,7 @@ import { useLocation } from 'preact-iso';
 import { signal, effect } from '@preact/signals';
 
 const inactivityTimeout = signal<ReturnType<typeof setTimeout> | null>(null);
-export const previousPath = signal<string>('');
+export const previousPath = signal<string>('/');
 export const logoutSignal = signal(true);
 
 interface Props {
@@ -38,6 +38,7 @@ function InactivityHandler({ excludePaths }: Props) {
 
     if (!excludePaths.includes(currentPath)) {
       previousPath.value = currentPath;
+      console.log(previousPath.value); // memo: temporary debug log
     }
 
     const resetInactivityTimer = () => {

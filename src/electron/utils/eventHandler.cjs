@@ -1,7 +1,7 @@
 const { db } = require('./initData.cjs');
 const { defaultEncrypt, defaultDecrypt, encrypt, decrypt, generateToken, getRandomTokenKey, checkRecoveryKeySize, makeBackupFile, getBackupTokens } = require('./encryption.cjs');
 const { hashPassword, comparePassword, mapPasswordData, faviconUrl, passwordAttemptStamp, clearAllAttempts } = require('./helper.cjs');
-const { clipboard } = require('electron');
+const { clipboard, shell } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -726,6 +726,17 @@ async function checkKeySize(event, keyString) {
   }
 }
 
+async function openExternalLink(event, url) {
+  try {
+    await shell.openExternal(url);
+    return true;
+  }
+  catch (err) {
+    console.log(err);
+    return false;
+  }
+}
+
 module.exports = {
   createEmailAccount,
   createServiceAccount,
@@ -754,5 +765,6 @@ module.exports = {
   getBackupData,
   loadBackupData,
   loadEachService,
-  checkKeySize
+  checkKeySize,
+  openExternalLink
 }

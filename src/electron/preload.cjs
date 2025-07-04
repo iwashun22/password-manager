@@ -60,6 +60,8 @@ contextBridge.exposeInMainWorld('user', {
     ipcRenderer.invoke('user:formatting-email', emailId, subaddress),
   saveDatabase: () =>
     ipcRenderer.invoke('user:save-database'),
+  openExternalLink: (url) =>
+    ipcRenderer.invoke('user:open-external-link', url)
 });
 
 contextBridge.exposeInMainWorld('backup', {

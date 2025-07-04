@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-preact';
 
 import './Accordion.scss';
 
-export type ColorVariant = 'blue' | 'green' | 'purple' | 'orange' | 'gray';
+export type ColorVariant = 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'gray';
 interface Props {
   headerText: string,
   variant?: ColorVariant

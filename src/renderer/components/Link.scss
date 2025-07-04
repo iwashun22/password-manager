@@ -1,0 +1,49 @@
+.icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  .icon-img {
+    padding: 0;
+    display: inline;
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+
+    &:hover {
+      filter: brightness(0.8);
+    }
+  }
+
+  .text {
+    color: #F4BB44;
+    font-size: 16px;
+    cursor: default;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.link {
+  background-color: transparent;
+  color: rgb(147, 147, 199);
+  text-decoration: underline;
+  font-size: inherit !important;
+  padding: 0 !important;
+  display: inline;
+
+  &:hover {
+    color: rgb(111, 111, 216);
+  }
+
+  .text {
+    display: inline;
+    padding: 0;
+  }
+
+  &.icon {
+    text-decoration: none;
+  }
+}

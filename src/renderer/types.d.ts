@@ -32,6 +32,7 @@ declare global {
       formattingEmail: (emailId: number, subaddress: string) => Promise<string | null>;
       retryFetchFavicon: (serviceId: number, domain: string) => Promise<Buffer | null>;
       saveDatabase: () => Promise<void>;
+      openExternalLink: (url: string) => Promise<boolean>;
     };
     backup: {
       getBackupData: (recoveryKey: string) => Promise<string | null>;

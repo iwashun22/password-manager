@@ -31,7 +31,8 @@ const {
   retryFetchFavicon,
   loadBackupData,
   loadEachService,
-  checkKeySize
+  checkKeySize,
+  openExternalLink
 } = require('./utils/eventHandler.cjs');
 
 const isDev = !app.isPackaged;
@@ -63,6 +64,7 @@ ipcMain.handle('user:request-decrypted-password', requestDecryptedPassword);
 ipcMain.handle('user:retry-fetch-favicon', retryFetchFavicon);
 ipcMain.handle('user:formatting-email', formattingEmail);
 ipcMain.handle('user:save-database', encryptDB);
+ipcMain.handle('user:open-external-link', openExternalLink);
 
 ipcMain.handle('backup:get-backup-data', getBackupData);
 ipcMain.handle('backup:load-backup-data', loadBackupData);

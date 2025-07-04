@@ -34,15 +34,28 @@ $border: 1px white solid;
   &.purple {
     --open-header-bg: rgb(59, 10, 97);
     --open-header-text: rgb(182, 116, 226);
-    --body-bg: rgb(163, 87, 230);
-    --body-text: rgb(204, 174, 227);
+    --body-bg: rgb(112, 60, 158);
+    --body-text: rgb(156, 125, 181);
+    --body-emphasize-text: rgb(195, 160, 223);
+    --body-emphasize-secondary-text: rgb(187, 136, 222);
   }
 
   &.orange {
     --open-header-bg: rgb(141, 96, 0);
     --open-header-text: rgb(240, 194, 110);
-    --body-bg: rgb(189, 146, 65);
-    --body-text: rgb(234, 219, 190);
+    --body-bg: rgb(160, 123, 55);
+    --body-emphasize-text: rgb(221, 199, 157);
+    --body-emphasize-secondary-text: rgb(220, 181, 134);
+    --body-text: rgb(221, 204, 157);
+  }
+
+  &.red {
+    --open-header-bg: rgb(98, 12, 12);
+    --open-header-text: rgb(176, 91, 91);
+    --body-bg: rgb(136, 53, 53);
+    --body-text: rgb(181, 106, 106);
+    --body-emphasize-text: rgb(239, 129, 129);
+    --body-emphasize-secondary-text: rgb(202, 113, 113);
   }
 }
 
@@ -103,7 +116,7 @@ $border: 1px white solid;
     * {
       text-align: justify;
       padding-inline: $text-padding;
-      font-size: 17px;
+      // font-size: 17px;
     }
   }
 
